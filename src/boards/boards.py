@@ -9,6 +9,7 @@ from boards.seriesticker import Seriesticker
 from boards.standings import Standings
 from boards.team_summary import TeamSummary
 from boards.clock import Clock
+#from boards.covid_19 import Covid_19
 from boards.pbdisplay import pbDisplay
 from boards.wxWeather import wxWeather
 from boards.wxAlert import wxAlert
@@ -17,6 +18,15 @@ from boards.seasoncountdown import SeasonCountdown
 from boards.wxForecast import wxForecast
 from boards.screensaver import screenSaver
 from boards.stanley_cup_champions import StanleyCupChampions
+from boards.ovigoals import OviGoals
+from boards.freedom import Freedom
+from boards.birthday0115 import Birthday0115
+from boards.birthday0201 import Birthday0201
+from boards.birthday0330 import Birthday0330
+from boards.birthday0403 import Birthday0403
+from boards.birthday0727 import Birthday0727
+from boards.birthday1001 import Birthday1001
+from boards.birthday1112 import Birthday1112
 from time import sleep
 
 
@@ -228,8 +238,8 @@ class Boards:
         Seriesticker(data, matrix, sleepEvent).render()
         '''if data.status.is_playoff(data.today, data.playoffs):
             Seriesticker(data, matrix, sleepEvent).render()
-        '''    
-    
+        '''  
+
     def stanley_cup_champions(self, data, matrix,sleepEvent):
         StanleyCupChampions(data, matrix, sleepEvent).render()
 
@@ -263,3 +273,30 @@ class Boards:
 
     def seasoncountdown(self, data, matrix,sleepEvent):
         SeasonCountdown(data, matrix, sleepEvent).draw()
+
+    def ovigoals(self, data, matrix,sleepEvent):
+        OviGoals(data, matrix, sleepEvent).draw()
+    
+    def freedom(self, data, matrix,sleepEvent):
+        Freedom(data, matrix, sleepEvent).draw()
+
+    def birthday0115(self, data, matrix,sleepEvent):
+        Birthday0115(data, matrix, sleepEvent).draw()
+
+    def birthday0201(self, data, matrix,sleepEvent):
+        Birthday0201(data, matrix, sleepEvent).draw()
+    
+    def birthday0330(self, data, matrix,sleepEvent):
+        Birthday0330(data, matrix, sleepEvent).draw()
+
+    def birthday0403(self, data, matrix,sleepEvent):
+        Birthday0403(data, matrix, sleepEvent).draw()
+    
+    def birthday0727(self, data, matrix,sleepEvent):
+        Birthday0727(data, matrix, sleepEvent).draw()
+
+    def birthday1001(self, data, matrix,sleepEvent):
+        Birthday1001(data, matrix, sleepEvent).draw()
+
+    def birthday1112(self, data, matrix,sleepEvent):
+        Birthday1112(data, matrix, sleepEvent).draw()
