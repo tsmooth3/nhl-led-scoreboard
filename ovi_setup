@@ -1,0 +1,6 @@
+scp pi@192.168.0.169:/home/pi/nhl-led-scoreboard/assets/images/ovi_goals.png ./assets/images/
+scp pi@192.168.0.169:/home/pi/nhl-led-scoreboard/src/nhl_api/data.py ./src/nhl_api/
+scp pi@192.168.0.169:/home/pi/nhl-led-scoreboard/src/boards/ovigoals.py ./src/boards/
+scp pi@192.168.0.169:/home/pi/nhl-led-scoreboard/src/boards/boards.py ./src/boards/
+scp pi@192.168.0.169:/home/pi/nhl-led-scoreboard/config/config.schema.json ./config/
+scp pi@192.168.0.169:/home/pi/nhl-led-scoreboard/config/config.json ./config/

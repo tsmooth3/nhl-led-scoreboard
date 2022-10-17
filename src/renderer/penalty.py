@@ -21,8 +21,7 @@ class PenaltyRenderer:
         self.severity = penalty_details.severity
         self.rotation_rate = 10
         self.matrix = matrix
-        self.font = data.config.layout.font
-        self.font_medium = data.config.layout.font_medium
+        self.font = data.config.layout.font_medium
         self.layout = data.config.config.layout.get_board_layout('penalty')
         self.sleepEvent = sleepEvent
         self.sleepEvent.clear()

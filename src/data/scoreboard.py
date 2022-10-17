@@ -86,7 +86,7 @@ class Scoreboard:
     def __init__(self, overview, data):
         time_format = data.config.time_format
         linescore = overview.linescore
-
+        
         away = linescore.teams.away
         away_abbrev = data.teams_info[away.team.id].abbreviation
         self.away_roster = data.teams_info[away.team.id].roster
@@ -104,7 +104,6 @@ class Scoreboard:
         if hasattr(overview,"plays"):
             plays = overview.plays
             away_scoring_plays, away_penalty_play, home_scoring_plays, home_penalty_play = filter_plays(plays,away.team.id,home.team.id)
-            
             
             # Get the Away Goal details
             # If the request to the API fails or is missing who scorer and the assists are, return an empty list of goal plays
@@ -174,6 +173,7 @@ class Scoreboard:
             self.periods.ordinal,
             self.periods.clock
         )
+        print(output)
         return output
 
 class Goal:

@@ -10,9 +10,6 @@ import debug
 import nhl_api
 
 class Seriesticker:
-    """
-        TODO: Take out the Series object and create a list of instence from the refresh_playoff in Data instead. Call the data only once a day.
-    """
     def __init__(self, data, matrix, sleepEvent):
         self.data = data
         self.rotation_rate = 5
@@ -21,7 +18,7 @@ class Seriesticker:
         self.sleepEvent = sleepEvent
         self.sleepEvent.clear()
         
-        self.font = data.config.layout.font
+        self.font = data.config.layout.font_medium
         self.layout = self.data.config.config.layout.get_board_layout('scoreticker')
         self.team_colors = self.data.config.team_colors
 
@@ -41,22 +38,26 @@ class Seriesticker:
             round_name = "Final" 
 
             if not self.data.current_round.number == 4:
-                color_conf = self.team_colors.color("{}.primary".format(series.conference))
-                banner_text = series.conference
+                try:
+                    color_conf = self.team_colors.color("{}.primary".format(series.conference))
+                    banner_text = series.conference
+                except:
+                    color_conf = self.team_colors.color("{}.primary".format("Western"))
+                    banner_text = "Western"
                 color_banner_bg = (color_conf['r'], color_conf['g'], color_conf['b'])
                 round_name = self.data.current_round_name
                 self.show_indicator(self.index, self.num_series)
             
             self.matrix.draw_text(
-                (1, 7),
+                (2, 14),
                 round_name,
                 font=self.font,
                 fill=(255,255,255)
             )
             # Conference banner, Round Title
-            self.matrix.draw.rectangle([0,0,self.matrix.width,5], fill=color_banner_bg)
+            self.matrix.draw.rectangle([0,0,self.matrix.width,10], fill=color_banner_bg)
             self.matrix.draw_text(
-                (1, 1), 
+                (2, 1), 
                 banner_text, 
                 font=self.font, 
                 fill=(0,0,0)
@@ -83,49 +84,50 @@ class Seriesticker:
         color_bottom_team = self.team_colors.color("{}.text".format(series.bottom_team.id))
 
         # Table
-        self.matrix.draw.line([(0,21),(self.matrix.width,21)], width=1, fill=(150,150,150))
+        self.matrix.draw.line([(0,42),(self.matrix.width,42)], width=2, fill=(150,150,150))
 
         # use rectangle because I want to keep symmetry for the background of team's abbrev
-        self.matrix.draw.rectangle([0,14,12,20], fill=(color_top_bg['r'], color_top_bg['g'], color_top_bg['b']))
+        self.matrix.draw.rectangle([0,28,24,40], fill=(color_top_bg['r'], color_top_bg['g'], color_top_bg['b']))
         self.matrix.draw_text(
-            (1, 15), 
+            (2, 30), 
             series.top_team.abbrev, 
             font=self.font, 
             fill=(color_top_team['r'], color_top_team['g'], color_top_team['b'])
         )
 
-        self.matrix.draw.rectangle([0,22,12,28], fill=(color_bottom_bg['r'], color_bottom_bg['g'], color_bottom_bg['b']))
+        self.matrix.draw.rectangle([0,44,24,56], fill=(color_bottom_bg['r'], color_bottom_bg['g'], color_bottom_bg['b']))
         self.matrix.draw_text(
-            (1, 23), 
+            (2, 46), 
             series.bottom_team.abbrev, 
             font=self.font, 
             fill=(color_bottom_team['r'], color_bottom_team['g'], color_bottom_team['b'])
         )
         
         rec_width = 0
-        top_row = 15
-        bottom_row = 23
+        top_row = 30
+        bottom_row = 46
         loosing_color = (150,150,150)
 
         # text offset for loosing score if the winning team has a score of 10 or higher and loosing team 
         # have a score lower then 10
 
-        """
-            TODO: Grabbing all the games of a series cause delay up to 15 sec for certain users. I think its time to put all the data
-            refresh into a thread and refresh everything from there
-            . 
-        """
         offset_correction = 0
         for game in series.games:
             attempts_remaining = 5
             while attempts_remaining > 0:
                 try:
-                    # Request the game overview
-                    overview = nhl_api.overview(game["gameId"])
+                    if game["gameId"] in series.game_overviews:
+                        # Look if the game data is already stored in the game overviews from the series
+                        overview = series.game_overviews[game["gameId"]]
+                    else:
+                        # Request and store the game overview in the series instance
+                        overview = series.get_game_overview(game["gameId"])
                     
                     # get the scoreboard
-                    scoreboard = Scoreboard(overview, self.data)
-
+                    try:
+                        scoreboard = Scoreboard(overview, self.data)
+                    except:
+                        break
                     if self.data.status.is_final(overview.status) and hasattr(scoreboard, "winning_team"):
                         if scoreboard.winning_team == series.top_team.id:
                             winning_row = top_row
@@ -140,10 +142,10 @@ class Seriesticker:
 
                         # Look loosing score text needs an offset
                         if len(str(scoreboard.winning_score)) == 2 and len(str(scoreboard.winning_score)) == 1:
-                            offset_correction = 1
+                            offset_correction = 2
                         
                         self.matrix.draw_text(
-                            ((rec_width + 15 + offset_correction), loosing_row), 
+                            ((rec_width + 30 + offset_correction), loosing_row), 
                             str(scoreboard.loosing_score), 
                             font=self.font, 
                             fill=loosing_color,
@@ -152,7 +154,7 @@ class Seriesticker:
                         )
 
                         position = self.matrix.draw_text(
-                            (rec_width + 15, winning_row), 
+                            (rec_width + 30, winning_row), 
                             str(scoreboard.winning_score), 
                             font=self.font, 
                             fill=(winning_team_color['r'], winning_team_color['g'], winning_team_color['b']), 

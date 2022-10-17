@@ -15,6 +15,7 @@ class Christmas:
         self.font = data.config.layout.font
         self.font.large = data.config.layout.font_large_2
         self.font.scroll = data.config.layout.font_xmas
+        self.font.medium = data.config.layout.font_medium
         self.days_to_xmas = 0
         self.scroll_pos = self.matrix.width
 
@@ -35,7 +36,8 @@ class Christmas:
 
         else:
             #today is not Christmas
-            self.xmas_countdown()
+            if self.days_to_xmas <= 100: 
+                self.xmas_countdown()
   
     def calc_days_to_xmas(self):
         #get today's date
@@ -102,13 +104,13 @@ class Christmas:
         debug.info("Counting down to Christmas!")
         #check for three-digit countdown
         if self.days_to_xmas < 99:
-            x_pos = 7
+            x_pos = 32
         else:
-            x_pos = 1
+            x_pos = 25
 
         #draw days to xmas
         self.matrix.draw_text(
-            (x_pos,6),
+            (x_pos,21),
             str(self.days_to_xmas),
              font=self.font.large,
              fill=(0,255,0)
@@ -116,19 +118,19 @@ class Christmas:
         
         #choose one of three daily images to draw based on days to xmas and draw it
         if self.days_to_xmas % 3 == 0:
-            xmas_image = Image.open(get_file('assets/images/xmas_tree.png'))
+            xmas_image = Image.open(get_file('assets/images/xmas_tree.png')).resize((48,48))
         elif self.days_to_xmas % 3 == 2:
-            xmas_image = Image.open(get_file('assets/images/candy_cane.png'))
+            xmas_image = Image.open(get_file('assets/images/candy_cane.png')).resize((48,48))
         else:
-            xmas_image = Image.open(get_file('assets/images/gbread.png'))
+            xmas_image = Image.open(get_file('assets/images/gbread.png')).resize((48,48))
 
-        self.matrix.draw_image((36,1), xmas_image)
+        self.matrix.draw_image((72,2), xmas_image)
            
         #draw bottom text        
         self.matrix.draw_text(
-            (1,26), 
+            (2,52), 
             "DAYS TO CHRISTMAS", 
-            font=self.font,
+            font=self.font.medium,
             fill=(255,0,0)
         )
 

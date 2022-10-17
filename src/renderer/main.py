@@ -32,10 +32,10 @@ class MainRenderer:
         if self.data.config.testing_mode:
             debug.info("Rendering in Testing Mode")
             while True:
-                ScoreboardRenderer(self.data, self.matrix, Scoreboard(self.data.games[0], self.data)).render()
+                #ScoreboardRenderer(self.data, self.matrix, Scoreboard(self.data.games[0], self.data)).render()
                 self.data.refresh_overview()
-                #self.scoreboard = Scoreboard(self.data.overview, self.data)
-                #self._draw_event_animation("penalty", self.scoreboard.home_team.id, self.scoreboard.home_team.name)
+                self.scoreboard = Scoreboard(self.data.overview, self.data)
+                self._draw_event_animation("goal", self.scoreboard.home_team.id, self.scoreboard.home_team.name)
                 #PenaltyRenderer(self.data, self.matrix, self.sleepEvent, self.scoreboard.away_team).render()
                 #TeamSummary(self.data, self.matrix, self.sleepEvent).render()
                 sleep(1)
@@ -78,12 +78,21 @@ class MainRenderer:
             self.data.refresh_data()
 
     def __render_offday(self):
+        i = 0
         while True:
             debug.info('PING !!! Render off day')
             if self.data._is_new_day():
                 debug.info('This is a new day')
                 return
             self.boards._off_day(self.data, self.matrix,self.sleepEvent)
+
+            if i >= 1:
+                debug.info("off day data refresh")
+                self.data.refresh_data()
+                i = 0
+            else:
+                i += 1
+            
 
     def __render_game_day(self):
         debug.info("Showing Game")
@@ -239,7 +248,6 @@ class MainRenderer:
 
     def check_new_goals(self):
         debug.log("Check new goal")
-
         pref_team_only = self.data.config.goal_anim_pref_team_only
         away_id = self.scoreboard.away_team.id
         away_name = self.scoreboard.away_team.name
@@ -332,9 +340,9 @@ class MainRenderer:
         preferred_team_only = self.data.config.goal_anim_pref_team_only
         # Get the list of gif's under the preferred and opposing directory
         ANIMATIONS = "assets/animations/{}".format(event)
-        all_gifs = glob.glob("/general/*.gif".format(ANIMATIONS))
-        preferred_gifs = glob.glob("/preferred/*.gif".format(ANIMATIONS))
-        opposing_gifs = glob.glob("/opposing/*.gif".format(ANIMATIONS))
+        general_gifs = glob.glob("{}/general/*.gif".format(ANIMATIONS))
+        preferred_gifs = glob.glob("{}/preferred/*.gif".format(ANIMATIONS))
+        opposing_gifs = glob.glob("{}/opposing/*.gif".format(ANIMATIONS))
 
         if event == "goal":
             filename = "{}/goal_light_animation.gif".format(ANIMATIONS)
@@ -342,9 +350,9 @@ class MainRenderer:
             filename = "{}/penalty_animation.gif".format(ANIMATIONS)
 
         # Use alternate animations if there is any in the respective folder
-        if all_gifs:
+        if general_gifs:
             # Set opposing team goal animation here
-            filename = random.choice(all_gifs)
+            filename = random.choice(general_gifs)
             debug.info("General animation is: " + filename)
 
         if opposing_gifs and not preferred_team_only:

@@ -30,7 +30,7 @@ def get_lat_lng(location):
             # error_message = "Unable to find {} with Open Street Map, falling back to IP lookup for location.".format(location)
             g = geocoder.ip('me')
             #debug.info("location is: " + g.city + ","+ g.country + " " + str(g.latlng))
-            message = "Unable to find [{}] with Open Street Map, used IP address to find your location is: ".format(location) + g.city + ","+ g.country + " " + str(g.latlng)
+            message = "Unable to find [{}] with Open Street Map".format(location)
         else:
             message = "location is: " + location + " " + str(g.latlng)
             

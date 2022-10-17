@@ -13,6 +13,7 @@ SCHEDULE_URL = BASE_URL + 'schedule?date={0}-{1}-{2}&expand=schedule.linescore'
 TEAM_URL = '{0}teams?expand=team.roster,team.stats,team.schedule.previous,team.schedule.next'.format(BASE_URL)
 PLAYER_URL = '{0}people/{1}'
 OVERVIEW_URL = BASE_URL + 'game/{0}/feed/live?site=en_nhl'
+OVIGOALS_URL = '{0}people/8471214/stats?stats=careerRegularSeason'
 STATUS_URL = BASE_URL + 'gameStatus'
 CURRENT_SEASON_URL = BASE_URL + 'seasons/current'
 STANDINGS_URL = BASE_URL + 'standings'
@@ -54,6 +55,12 @@ def get_overview(game_id):
     except requests.exceptions.RequestException as e:
         raise ValueError(e)
 
+def get_ovi_goals():
+    try:
+        data = requests.get(OVIGOALS_URL.format(BASE_URL), timeout=REQUEST_TIMEOUT)
+        return data
+    except requests.exceptions.RequestException as e:
+        raise ValueError(e)
 
 def get_game_status():
     try:
