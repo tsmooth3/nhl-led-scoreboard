@@ -1,6 +1,7 @@
 from rgbmatrix import graphics
 from PIL import ImageFont, Image
 from utils import center_text, get_file
+import json
 import debug
 import requests
 import time
@@ -26,7 +27,7 @@ class StreamLabs:
 
     def draw_streamlabs(self) :
         self.matrix.clear()
-        font1 = ImageFont.truetype(get_file("assets/fonts/04B_24__.TTF"), 12)
+        font1 = ImageFont.truetype(get_file("assets/fonts/04B_24__.TTF"), 14)
         font2 = ImageFont.truetype(get_file("assets/fonts/04B_03B_.TTF"), 12)
         font3 = ImageFont.truetype(get_file("assets/fonts/04B_03__.TTF"), 12)
         font4 = ImageFont.truetype(get_file("assets/fonts/retro_computer.ttf"), 12)
@@ -44,9 +45,30 @@ class StreamLabs:
         res = requests.get(usageUri, headers=headers)
         results = res.json()['readings']
         
+        with open('../pbjelly/filter.json', 'r') as openfile:
+            filterObj = json.load(openfile)
+        with open('../pbjelly/softener.json', 'r') as openfile:
+            softenerObj = json.load(openfile)
+        sinceReset1 = url + "/v1/locations/" + locationId + "/readings/water-usage?groupBy=day&startTime=" + filterObj['resetDate']
+        sinceReset2 = url + "/v1/locations/" + locationId + "/readings/water-usage?groupBy=day&startTime=" + softenerObj['resetDate']
+        res1 = requests.get(sinceReset1, headers=headers)
+        res2 = requests.get(sinceReset2, headers=headers)
+        usage1 = sum(map(lambda x: float(x['volume']), res1.json()['readings']))
+        usage2 = sum(map(lambda x: float(x['volume']), res2.json()['readings']))
+        print(f"{filterObj['capacity']} - {usage1}")
+        print(f"{softenerObj['capacity']} - {usage2}")
+        fRemaining = int(filterObj['capacity'] - (usage1*.72))
+        sRemaining = int(softenerObj['capacity'] - (usage2*.72))
+        print(res1.json())
+        print(res2.json())
+        
         # testing response of 6 elements because today is 0
         #results.pop()
-       
+        
+        pushToken = 'o.eNBIagc4Wx1imQuOehnI3RClOYdMMneP'
+        pushHeaders = {'Access-Token':f'{pushToken}','Content-Type':'application/json'}
+        pushUrl = 'https://api.pushbullet.com/v2/pushes'
+        
         rCount = len(results)
         self.matrix.draw_rectangle((0,0),(128,64),(32,55,65))
         bars = []
@@ -79,12 +101,39 @@ class StreamLabs:
             self.matrix.draw_text((5+3*6*x,50),rDates[x].strftime("%a")[0:1],font=font4,fill=(242,242,242))
         if rCount == 6:
             self.matrix.draw_text((5+3*6*6,50),now.strftime("%a")[0:1],font=font4,fill=(242,242,242))
-            self.matrix.draw_text((83,1),  "0".ljust(4),font=font4,fill=(242,242,242))
+            nowGal = 0
         if rCount == 7:
-            self.matrix.draw_text((83,1),  str(rVols[6]).ljust(4),font=font4,fill=(242,242,242))
-        self.matrix.draw_text((33,1),  "Now".ljust(4) + ":".ljust(2),font=font4,fill=(242,242,242))
-        self.matrix.draw_text((33,15), "Max".ljust(4) + ":".ljust(2),font=font4,fill=(242,242,242))
-        self.matrix.draw_text((83,15), str(maxGal).ljust(4),font=font4,fill=(242,33,222))
+            nowGal = rVols[6]
+        
+        # send pushBullet
+        pushPayload = json.dumps({
+            "title":"StreamLabs",
+            "body": f"Current Usage: {nowGal}",
+            "type":"note"
+        })
+        # pushResponse = requests.request("POST", pushUrl, headers=pushHeaders, data=pushPayload) 
+        
+        # draw the stuff
+        self.matrix.draw_text((32,1),  "Now".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((59,1),  str(nowGal).ljust(4),font=font1,fill=(242,242,242))
+        
+        self.matrix.draw_text((83,1),  "F*".ljust(2) + ":".ljust(2),font=font1,fill=(242,242,242))
+        if fRemaining < 100:
+            self.matrix.draw_text((100,1),  str(fRemaining).ljust(4),font=font1,fill=(255,255,0))
+        else:
+            self.matrix.draw_text((100,1),  str(fRemaining).ljust(4),font=font1,fill=(242,242,242))
+        debug.info("f* " + str(fRemaining))
+        
+        self.matrix.draw_text((32,15), "Max".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((59,15), str(maxGal).ljust(4),font=font1,fill=(242,33,222))
+        
+        self.matrix.draw_text((83,15), "S*".ljust(2) + ":".ljust(2),font=font1,fill=(242,242,242))
+        if sRemaining < 100:
+            self.matrix.draw_text((100,15),  str(sRemaining).ljust(4),font=font1,fill=(255,255,0))
+        else:
+            self.matrix.draw_text((100,15),  str(sRemaining).ljust(4),font=font1,fill=(242,242,242))
+        debug.info("s* " + str(sRemaining))
+        
         self.matrix.draw_image((0,0), streamlabs_image)
         self.matrix.render()
         self.sleepEvent.wait(30)
