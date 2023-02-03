@@ -1,6 +1,7 @@
 from rgbmatrix import graphics
 from PIL import ImageFont, Image
 from utils import center_text, get_file
+from statistics import mean
 import json
 import debug
 import requests
@@ -20,6 +21,7 @@ class StreamLabs:
         self.font.medium = data.config.layout.font_medium
         self.font.scroll = data.config.layout.font_xmas
         self.scroll_pos = self.matrix.width
+        self.SL_TOKEN = ''
 
     def draw(self):
         debug.info("StreamLabs board launched")
@@ -31,20 +33,50 @@ class StreamLabs:
         font2 = ImageFont.truetype(get_file("assets/fonts/04B_03B_.TTF"), 12)
         font3 = ImageFont.truetype(get_file("assets/fonts/04B_03__.TTF"), 12)
         font4 = ImageFont.truetype(get_file("assets/fonts/retro_computer.ttf"), 12)
-        now = datetime.today()
-        startDate = now - timedelta(days=6,hours=now.hour,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
-        url = "https://api.streamlabswater.com"
-        headers = {
-            "Authorization" : "Bearer CbZt2qUVD0isylKyJ3cpQh6Dk94T7rq7wGtKOg5RlBjBnQ-8ralB9Q"
-        }
-        barMax = 32
         streamlabs_image = Image.open(get_file('assets/images/streamlabs.png')).resize((32,32))
+        
+        page = 1
+        barMax = 32
+        index = 0
+        segment = 0
+        segmentVol = 0
+        dayTotal = 0
+        rVols = [] 
+        results = []
+        bars = []
+        barMax = 96+16
+        chartMax = 285
+        morn = (164,221,224)
+        day = (55,117,176)
+        evening = (65,16,227) 
+        maxColor = (242,33,222)
+        avgColor = (88,88,88)
+       
+        now = datetime.today()
+        startDate = now - timedelta(days=2,hours=now.hour,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
+        thirtyStartDate = now - timedelta(days=30,hours=now.hour,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
+        url = "https://api.streamlabswater.com"
+        if self.SL_TOKEN == '':
+            with open("config/streamlabs_token.txt") as f:
+                self.SL_TOKEN = f.read().strip() 
+        headers = {
+            "Authorization" : f"Bearer {self.SL_TOKEN}"
+        }
+       
         res = requests.get(url + "/v1/locations", headers=headers)
         locationId = res.json()['locations'][0]['locationId']
-        usageUri = url + "/v1/locations/" + locationId + "/readings/water-usage?groupBy=day&startTime=" + startDate.astimezone().isoformat()
-        res = requests.get(usageUri, headers=headers)
-        results = res.json()['readings']
-        
+        hourlyUsageUri = url + "/v1/locations/" + locationId + f"/readings/water-usage?page={page}&groupBy=hour&startTime=" + startDate.astimezone().isoformat()
+        thirtydayUsageUri = url + "/v1/locations/" + locationId + f"/readings/water-usage?page={page}&groupBy=day&startTime=" + thirtyStartDate.astimezone().isoformat()
+        res = requests.get(hourlyUsageUri, headers=headers)
+        thirtydayres = requests.get(thirtydayUsageUri, headers=headers)
+        thirtydayresults = thirtydayres.json()['readings']
+        results += res.json()['readings']
+        while(page < res.json()['pageCount']):
+            page += 1
+            hourlyUsageUri = url + "/v1/locations/" + locationId + f"/readings/water-usage?page={page}&groupBy=hour&startTime=" + startDate.astimezone().isoformat()
+            res = requests.get(hourlyUsageUri, headers=headers)
+            results += res.json()['readings']
+
         with open('../pbjelly/filter.json', 'r') as openfile:
             filterObj = json.load(openfile)
         with open('../pbjelly/softener.json', 'r') as openfile:
@@ -62,60 +94,71 @@ class StreamLabs:
         print(res1.json())
         print(res2.json())
         
-        # testing response of 6 elements because today is 0
-        #results.pop()
-        
-        pushToken = 'o.eNBIagc4Wx1imQuOehnI3RClOYdMMneP'
-        pushHeaders = {'Access-Token':f'{pushToken}','Content-Type':'application/json'}
-        pushUrl = 'https://api.pushbullet.com/v2/pushes'
-        
-        rCount = len(results)
         self.matrix.draw_rectangle((0,0),(128,64),(32,55,65))
-        bars = []
-        rVols = []
-        rDates = []
+        self.matrix.draw_image((0,-1), streamlabs_image)
+        
         for r in results:
+            # get the stuff
             rDate = datetime.fromisoformat(r['time'])
             rVol = math.ceil(r['volume'])
-            rVols.append(rVol)
-            rDates.append(rDate)
-            debug.info(str(rDate.month) + "/" + str(rDate.day) + " : " + rDate.strftime("%a")[0:1] + " : " + str(rVol))
-        maxGal = max(rVols)
+
+            #rDate.hour % 8 = 0
+            if rDate.hour % 8 == 0:
+                if len(rVols) > 0:
+                    segment += 1
+                    segmentVol = 0
+                    index += 1
+                    if segment == 3:
+                        segment = 0
+                        dayTotal = 0
+                rVols.append({'date':rDate,'seg':segment,'vol':0,'dayTotal':0})
+
+            # add the volume to current segment
+            segmentVol += rVol
+            dayTotal += rVol
+            rVols[index]['date']=rDate
+            rVols[index]['seg']=segment
+            rVols[index]['vol']=segmentVol
+            rVols[index]['dayTotal']=dayTotal
+    
+        avgGal = mean(list(map(lambda x: (x['volume']), thirtydayresults)))
+        avgBar = round((avgGal/chartMax)*barMax)
+        maxGal = max(list(map(lambda x: (math.ceil(x['volume'])), thirtydayresults)))
+        maxBar = round((maxGal/chartMax)*barMax)
+        print(f"average: {avgGal} - maxGal: {maxGal} - chartMax: {chartMax}")
+
         for v in rVols:
-            bars.append(round((v/maxGal)*barMax))
-        for x in range(rCount):
-            if rVols[x] == maxGal:
-                x1 = 3+3*6*x
-                x2 = 15
-                y1 = 64
-                y2 = -bars[x]
-                debug.info(str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2))
-                self.matrix.draw_rectangle((x1,y1),(x2,y2),(242,33,222))
-            if rVols[x] != maxGal:
-                x1 = 3+3*6*x
-                x2 = 15
-                y1 = 64
-                y2 = -bars[x]
-                debug.info(str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2))
-                self.matrix.draw_rectangle((x1,y1),(x2,y2), (0,180,220))
-            self.matrix.draw_text((5+3*6*x,50),rDates[x].strftime("%a")[0:1],font=font4,fill=(242,242,242))
-        if rCount == 6:
-            self.matrix.draw_text((5+3*6*6,50),now.strftime("%a")[0:1],font=font4,fill=(242,242,242))
-            nowGal = 0
-        if rCount == 7:
-            nowGal = rVols[6]
-        
-        # send pushBullet
-        pushPayload = json.dumps({
-            "title":"StreamLabs",
-            "body": f"Current Usage: {nowGal}",
-            "type":"note"
-        })
-        # pushResponse = requests.request("POST", pushUrl, headers=pushHeaders, data=pushPayload) 
-        
+            bars.append(round((v['vol']/chartMax)*barMax))
+            # print(v)
+
+        self.matrix.draw_rectangle((16+avgBar+2,28),(1,36), (242,242,0))
+        self.matrix.draw_rectangle((16+maxBar+2,28),(1,36), (242,33,222))
+        for i in range(0, len(bars), 3):
+            try:
+                x1 = bars[i]
+            except:
+                x1 = 0
+    
+            try:
+                x2 = bars[i+1]
+            except:
+                x2 = 0
+    
+            try:
+                x3 = bars[i+2]
+            except:
+                x3 = 0
+
+            self.matrix.draw_text((3,30+(i*4)),rVols[i]['date'].strftime("%a")[0:1],font=font4,fill=(242,242,242))
+            self.matrix.draw_rectangle((16,30+(i*4)),(x1,8),morn)
+            self.matrix.draw_rectangle((16+x1+1,30+(i*4)),(x2,8),day)
+            self.matrix.draw_rectangle((16+x1+x2+2,30+(i*4)),(x3,8),evening)
+ 
         # draw the stuff
+        self.matrix.draw_rectangle((16+avgBar+2,28),(1,36), avgColor)
+        self.matrix.draw_rectangle((16+maxBar+2,28),(1,36), maxColor)
         self.matrix.draw_text((32,1),  "Now".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
-        self.matrix.draw_text((59,1),  str(nowGal).ljust(4),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((59,1),  str(rVols[-1]['dayTotal']).ljust(4),font=font1,fill=(242,242,242))
         
         self.matrix.draw_text((83,1),  "F*".ljust(2) + ":".ljust(2),font=font1,fill=(242,242,242))
         if fRemaining < 100:
@@ -134,7 +177,6 @@ class StreamLabs:
             self.matrix.draw_text((100,15),  str(sRemaining).ljust(4),font=font1,fill=(242,242,242))
         debug.info("s* " + str(sRemaining))
         
-        self.matrix.draw_image((0,0), streamlabs_image)
         self.matrix.render()
         self.sleepEvent.wait(30)
 
