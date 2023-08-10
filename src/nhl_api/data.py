@@ -1,6 +1,7 @@
 import json
 import requests
 import debug
+from datetime import date
 
 """
     TODO:
@@ -16,6 +17,7 @@ OVERVIEW_URL = BASE_URL + 'game/{0}/feed/live?site=en_nhl'
 OVIGOALS_URL = '{0}people/8471214/stats?stats=careerRegularSeason'
 STATUS_URL = BASE_URL + 'gameStatus'
 CURRENT_SEASON_URL = BASE_URL + 'seasons/current'
+NEXT_SEASON_URL = BASE_URL + 'seasons/{0}'
 STANDINGS_URL = BASE_URL + 'standings'
 STANDINGS_WILD_CARD = STANDINGS_URL + '/wildCardWithLeaders'
 PLAYOFF_URL = BASE_URL + "tournaments/playoffs?expand=round.series,schedule.game.seriesSummary&season={}"
@@ -77,6 +79,19 @@ def get_current_season():
     except requests.exceptions.RequestException as e:
         raise ValueError(e)
 
+def get_next_season():
+    # Create the next seasonID from the current year and curent year +1 eg: 20232024 is seasonID for 2023-2024 season
+    # This will return an empty set for seasons data if the seasonID has nothing, a 200 response will always occur
+    current_year = date.today().year
+    next_year = current_year + 1
+
+    nextseasonID="{0}{1}".format(current_year,next_year)
+
+    try:
+        data = requests.get(NEXT_SEASON_URL.format(nextseasonID), timeout=REQUEST_TIMEOUT)
+        return data
+    except requests.exceptions.RequestException as e:
+        raise ValueError(e)
 
 def get_standings():
     try:

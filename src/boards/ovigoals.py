@@ -92,6 +92,7 @@ class OviGoals:
                 font=self.font.medium,
                 fill=(255,255,0)
             )
+            self.matrix.image.save('/home/pi/pbjelly/ovi.png')
         else: 
             debug.info("Drawing 64x32 Ovi")
             ovi_image = Image.open(get_file('assets/images/ovi_goals.png'))

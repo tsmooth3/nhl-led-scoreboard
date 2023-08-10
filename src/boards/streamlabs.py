@@ -46,11 +46,11 @@ class StreamLabs:
         bars = []
         barMax = 96+16
         chartMax = 285
-        morn = (164,221,224)
+        morn = (168,246,252)
         day = (55,117,176)
-        evening = (65,16,227) 
+        evening = (99,177,213) 
         maxColor = (242,33,222)
-        avgColor = (88,88,88)
+        avgColor = (228,228,228)
        
         now = datetime.today()
         startDate = now - timedelta(days=2,hours=now.hour,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
@@ -114,8 +114,10 @@ class StreamLabs:
                 rVols.append({'date':rDate,'seg':segment,'vol':0,'dayTotal':0})
 
             # add the volume to current segment
+            print(rVols)
             segmentVol += rVol
             dayTotal += rVol
+            print(f"index: {index}")
             rVols[index]['date']=rDate
             rVols[index]['seg']=segment
             rVols[index]['vol']=segmentVol
@@ -156,6 +158,7 @@ class StreamLabs:
  
         # draw the stuff
         self.matrix.draw_rectangle((16+avgBar+2,28),(1,36), avgColor)
+        self.matrix.draw_text((16+avgBar-20,28), "avg "+str(round(avgGal)),font=font1,fill=avgColor)
         self.matrix.draw_rectangle((16+maxBar+2,28),(1,36), maxColor)
         self.matrix.draw_text((32,1),  "Now".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
         self.matrix.draw_text((59,1),  str(rVols[-1]['dayTotal']).ljust(4),font=font1,fill=(242,242,242))
@@ -176,7 +179,7 @@ class StreamLabs:
         else:
             self.matrix.draw_text((100,15),  str(sRemaining).ljust(4),font=font1,fill=(242,242,242))
         debug.info("s* " + str(sRemaining))
-        
+        self.matrix.image.save("/home/pi/pbjelly/streamlabs.png") 
         self.matrix.render()
         self.sleepEvent.wait(30)
 

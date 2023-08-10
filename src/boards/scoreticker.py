@@ -33,6 +33,7 @@ class Scoreticker:
                 sr = ScoreboardRenderer(self.data, self.matrix, Scoreboard(self.games[self.index], self.data))
                 sr.render()
                 self.show_indicator()
+                #self.matrix.image.save(f"/home/pi/pbjelly/game{self.index}.png")
                 self.matrix.render()
 
                 if self.data.network_issues:
