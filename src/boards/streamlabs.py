@@ -77,21 +77,21 @@ class StreamLabs:
             res = requests.get(hourlyUsageUri, headers=headers)
             results += res.json()['readings']
 
-        with open('../pbjelly/filter.json', 'r') as openfile:
-            filterObj = json.load(openfile)
+        #with open('../pbjelly/filter.json', 'r') as openfile:
+        #    filterObj = json.load(openfile)
         with open('../pbjelly/softener.json', 'r') as openfile:
             softenerObj = json.load(openfile)
-        sinceReset1 = url + "/v1/locations/" + locationId + "/readings/water-usage?groupBy=day&startTime=" + filterObj['resetDate']
+        #sinceReset1 = url + "/v1/locations/" + locationId + "/readings/water-usage?groupBy=day&startTime=" + filterObj['resetDate']
         sinceReset2 = url + "/v1/locations/" + locationId + "/readings/water-usage?groupBy=day&startTime=" + softenerObj['resetDate']
-        res1 = requests.get(sinceReset1, headers=headers)
+        #res1 = requests.get(sinceReset1, headers=headers)
         res2 = requests.get(sinceReset2, headers=headers)
-        usage1 = sum(map(lambda x: float(x['volume']), res1.json()['readings']))
+        #usage1 = sum(map(lambda x: float(x['volume']), res1.json()['readings']))
         usage2 = sum(map(lambda x: float(x['volume']), res2.json()['readings']))
-        print(f"{filterObj['capacity']} - {usage1}")
+        #print(f"{filterObj['capacity']} - {usage1}")
         print(f"{softenerObj['capacity']} - {usage2}")
-        fRemaining = int(filterObj['capacity'] - (usage1*.72))
+        #fRemaining = int(filterObj['capacity'] - (usage1*.72))
         sRemaining = int(softenerObj['capacity'] - (usage2*.72))
-        print(res1.json())
+        #print(res1.json())
         print(res2.json())
         
         self.matrix.draw_rectangle((0,0),(128,64),(32,55,65))
@@ -111,7 +111,7 @@ class StreamLabs:
                     if segment == 3:
                         segment = 0
                         dayTotal = 0
-                rVols.append({'date':rDate,'seg':segment,'vol':0,'dayTotal':0})
+            rVols.append({'date':rDate,'seg':segment,'vol':0,'dayTotal':0})
 
             # add the volume to current segment
             print(rVols)
@@ -157,27 +157,30 @@ class StreamLabs:
             self.matrix.draw_rectangle((16+x1+x2+2,30+(i*4)),(x3,8),evening)
  
         # draw the stuff
+        nowVol = math.ceil(thirtydayresults[-1]['volume'])
         self.matrix.draw_rectangle((16+avgBar+2,28),(1,36), avgColor)
         self.matrix.draw_text((16+avgBar-20,28), "avg "+str(round(avgGal)),font=font1,fill=avgColor)
         self.matrix.draw_rectangle((16+maxBar+2,28),(1,36), maxColor)
         self.matrix.draw_text((32,1),  "Now".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
-        self.matrix.draw_text((59,1),  str(rVols[-1]['dayTotal']).ljust(4),font=font1,fill=(242,242,242))
+        # self.matrix.draw_text((59,1),  str(rVols[-1]['dayTotal']).ljust(4),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((59,1),  str(nowVol).ljust(4),font=font1,fill=(242,242,242))
         
-        self.matrix.draw_text((83,1),  "F*".ljust(2) + ":".ljust(2),font=font1,fill=(242,242,242))
-        if fRemaining < 100:
-            self.matrix.draw_text((100,1),  str(fRemaining).ljust(4),font=font1,fill=(255,255,0))
-        else:
-            self.matrix.draw_text((100,1),  str(fRemaining).ljust(4),font=font1,fill=(242,242,242))
-        debug.info("f* " + str(fRemaining))
+        #self.matrix.draw_text((83,1),  "F*".ljust(2) + ":".ljust(2),font=font1,fill=(242,242,242))
+        #if fRemaining < 100:
+        #    self.matrix.draw_text((100,1),  str(fRemaining).ljust(4),font=font1,fill=(255,255,0))
+        #else:
+        #    self.matrix.draw_text((100,1),  str(fRemaining).ljust(4),font=font1,fill=(242,242,242))
+        #debug.info("f* " + str(fRemaining))
         
         self.matrix.draw_text((32,15), "Max".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
         self.matrix.draw_text((59,15), str(maxGal).ljust(4),font=font1,fill=(242,33,222))
         
-        self.matrix.draw_text((83,15), "S*".ljust(2) + ":".ljust(2),font=font1,fill=(242,242,242))
+        #self.matrix.draw_text((80,15), "S*".ljust(2) + ":".ljust(2),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((83,1), "Softnr:",font=font1,fill=(242,242,242))
         if sRemaining < 100:
-            self.matrix.draw_text((100,15),  str(sRemaining).ljust(4),font=font1,fill=(255,255,0))
+            self.matrix.draw_text((95,15),  str(sRemaining).ljust(4),font=font1,fill=(255,255,0))
         else:
-            self.matrix.draw_text((100,15),  str(sRemaining).ljust(4),font=font1,fill=(242,242,242))
+            self.matrix.draw_text((95,15),  str(sRemaining).ljust(4),font=font1,fill=(242,242,242))
         debug.info("s* " + str(sRemaining))
         self.matrix.image.save("/home/pi/pbjelly/streamlabs.png") 
         self.matrix.render()

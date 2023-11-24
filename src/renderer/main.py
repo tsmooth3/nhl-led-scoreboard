@@ -53,27 +53,27 @@ class MainRenderer:
         while True:
             debug.info('Rendering...')
 
-            if self.status.is_offseason(self.data.date()):
+            #if self.status.is_offseason(self.data.date()):
                 # Offseason (Show offseason related stuff)
-                debug.info("It's offseason")
-                self.__render_offday()
-            elif self.data.config.testScChampions:
-                self.test_stanley_cup_champion(self.data.config.testScChampions)
+            #    debug.info("It's offseason")
+            #    self.__render_offday()
+            #elif self.data.config.testScChampions:
+            #    self.test_stanley_cup_champion(self.data.config.testScChampions)
 
-            else:
+            #else:
                 # Season.
-                if not self.data.config.live_mode:
-                    debug.info("Live mode is off. Going through the boards")
-                    self.__render_offday()
-                elif self.data.is_pref_team_offday():
-                    debug.info("Your preferred teams are Off today")
-                    self.__render_offday()
-                elif self.data.is_nhl_offday():
-                    debug.info("There is no game in the NHL today")
-                    self.__render_offday()
-                else:
-                    debug.info("Game Day Wooooo")
-                    self.__render_game_day()
+            #    if not self.data.config.live_mode:
+            #        debug.info("Live mode is off. Going through the boards")
+            self.__render_offday()
+            #    elif self.data.is_pref_team_offday():
+            #        debug.info("Your preferred teams are Off today")
+            #        self.__render_offday()
+            #    elif self.data.is_nhl_offday():
+            #        debug.info("There is no game in the NHL today")
+            #        self.__render_offday()
+            #    else:
+            #        debug.info("Game Day Wooooo")
+            #        self.__render_game_day()
 
             self.data.refresh_data()
 

@@ -156,7 +156,7 @@ class Data:
         self.refresh_current_date()
 
         # Set the pointer to the first game in the list of Pref Games
-        #self.current_game_index = 0
+        self.current_game_index = 0
 
         # Fetch the games for today
         self.refresh_games()
@@ -171,7 +171,7 @@ class Data:
         self.refresh_standings()
 
         # Fetch the playoff data
-        self.refresh_playoff()
+        #self.refresh_playoff()
 
         # Playoff Flag
         self.isPlayoff = False
@@ -234,7 +234,7 @@ class Data:
     # Daily NHL Data
 
     def get_teams(self):
-        attempts_remaining = 5
+        attempts_remaining = 1
         while attempts_remaining > 0:
             try:
                 teams = nhl_api.teams()
@@ -242,7 +242,7 @@ class Data:
                 return teams
 
             except ValueError as error_message:
-                self.network_issues = True
+                #self.network_issues = True
                 debug.error("Failed to Get the list of Teams. {} attempt remaining.".format(attempts_remaining))
                 debug.error(error_message)
                 attempts_remaining -= 1
@@ -262,7 +262,7 @@ class Data:
             TODO:
                 Add the option to start the earliest game in the preferred game list but change to the top one as soon as it start.
         """
-        attempts_remaining = 5
+        attempts_remaining = 1
         while attempts_remaining > 0:
             try:
                 self.games = nhl_api.day(self.year, self.month, self.day)
@@ -279,7 +279,7 @@ class Data:
                 break
 
             except ValueError as error_message:
-                self.network_issues = True
+                #self.network_issues = True
                 debug.error("Failed to refresh the list of games. {} attempt remaining.".format(attempts_remaining))
                 debug.error(error_message)
                 attempts_remaining -= 1
@@ -347,7 +347,7 @@ class Data:
     
     # This is the function that will determine the state of the board (Offday, Gameday, Live etc...).
     def get_status(self):
-        attempts_remaining = 5
+        attempts_remaining = 1
         while attempts_remaining > 0:
             try:
                 print("getting status")
@@ -355,7 +355,7 @@ class Data:
                 break
 
             except ValueError as error_message:
-                self.network_issues = True
+                #self.network_issues = True
                 debug.error("Failed to refresh the Status data. {} attempt remaining.".format(attempts_remaining))
                 debug.error(error_message)
                 attempts_remaining -= 1
@@ -370,7 +370,7 @@ class Data:
             Get a all the data of the main event.
         :return:
         """
-        attempts_remaining = 5
+        attempts_remaining = 1
         while attempts_remaining > 0:
             try:
                 self.overview = nhl_api.overview(self.current_game_id)
@@ -381,7 +381,7 @@ class Data:
                 self.network_issues = False
                 break
             except ValueError as error_message:
-                self.network_issues = True
+                #self.network_issues = True
                 debug.error("Failed to refresh the Overview. {} attempt remaining.".format(attempts_remaining))
                 debug.error(error_message)
                 attempts_remaining -= 1
@@ -411,14 +411,14 @@ class Data:
     # Standings
 
     def refresh_standings(self):
-        attempts_remaining = 5
+        attempts_remaining = 1
         while attempts_remaining > 0:
             try:
                 self.standings = nhl_api.standings()
                 break
 
             except ValueError as error_message:
-                self.network_issues = True
+                #self.network_issues = True
                 debug.error("Failed to refresh the Standings. {} attempt remaining.".format(attempts_remaining))
                 debug.error(error_message)
                 attempts_remaining -= 1
@@ -476,7 +476,7 @@ class Data:
             TODO:
                 Add a refresh function to the Series object instead and trigger a refresh only at specific time in the renderer.(End of a game, new day)
         """
-        attempts_remaining = 5
+        attempts_remaining = 1
         while attempts_remaining > 0:
             try:
                 # Get the plaoffs data from the nhl api
@@ -517,7 +517,7 @@ class Data:
                 break
 
             except ValueError as error_message:
-                self.network_issues = True
+                #self.network_issues = True
                 debug.error("Failed to refresh the list of Series. {} attempt remaining.".format(attempts_remaining))
                 debug.error(error_message)
                 attempts_remaining -= 1
@@ -579,4 +579,4 @@ class Data:
         self.refresh_standings()
 
         # Fetch the playoff data
-        self.refresh_playoff()
+        #self.refresh_playoff()

@@ -3,9 +3,10 @@ from PIL import ImageFont, Image
 from utils import center_text
 import datetime
 import debug
+import requests
 from time import sleep
 from utils import get_file
-import nhl_api.data
+#import nhl_api.data
 
 class OviGoals:
     def __init__(self, data, matrix,sleepEvent):
@@ -28,9 +29,12 @@ class OviGoals:
     def draw_ovi_goals(self) :
         
         self.matrix.clear()
-        odata = nhl_api.data.get_ovi_goals()
+        ovi_uri = 'https://api-web.nhle.com/v1/player/8471214/landing'
+        #odata = nhl_api.data.get_ovi_goals()
+        odata = requests.get(ovi_uri)
         oparsed = odata.json()
-        goalcount = oparsed["stats"][0]["splits"][0]["stat"]['goals']
+        #goalcount = oparsed["stats"][0]["splits"][0]["stat"]['goals']
+        goalcount = oparsed['careerTotals']['regularSeason']['goals']
         #for testing
         #goalcount = 908
         debug.info(str(goalcount) + " Ovi Goals")

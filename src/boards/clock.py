@@ -26,8 +26,10 @@ class Clock:
 
 
         #Select the first preferred team for clock setting
-        self.clock_color = self.team_colors.color("{}.primary".format(self.preferred_teams[0]))
-        self.wxdt_color = self.team_colors.color("{}.text".format(self.preferred_teams[0]))
+        #self.clock_color = self.team_colors.color("{}.primary".format(self.preferred_teams[0]))
+        #self.wxdt_color = self.team_colors.color("{}.text".format(self.preferred_teams[0]))
+        self.clock_color = {'r': 255, 'b': 0, 'g': 0}
+        self.wxdt_color = {'r': 255, 'b': 255, 'g': 255}
 
         #If text of team is black, force to white
         if self.wxdt_color == {'r': 0, 'b': 0, 'g': 0}:

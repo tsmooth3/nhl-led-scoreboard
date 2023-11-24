@@ -3,6 +3,7 @@ from PIL import ImageFont, Image
 from utils import center_text
 from datetime import datetime, date
 import debug
+import requests
 from time import sleep
 from utils import get_file
 
@@ -20,8 +21,11 @@ class SeasonCountdown:
         self.font.large = data.config.layout.font_large
         self.font.large2 = data.config.layout.font_large_2
         # Current season seems to not update until pre-season start so I will have to modify the Status and the nhl_api to get the coming season.
-        #self.season_start = datetime.date(2021,10,12)
-        self.season_start = datetime.strptime(self.data.status.next_season_start(), '%Y-%m-%d').date()
+        # self.season_start = datetime(2023, 10, 7).date()
+        season_uri = 'https://api.nhle.com/stats/rest/en/season?sort=%5B%7B%22property%22:%22id%22,%22direction%22:%22DESC%22%7D%5D'
+        season_response = requests.get(season_uri).json()['data'][0]['startDate']
+        self.season_start = datetime.strptime(season_response, '%Y-%m-%dT%H:%M:%S').date()
+        #self.season_start = datetime.strptime(self.data.status.next_season_start(), '%Y-%m-%d').date()
         self.days_until_season = (self.season_start - date.today()).days
         self.scroll_pos = self.matrix.width
         
