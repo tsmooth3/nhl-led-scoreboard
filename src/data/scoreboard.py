@@ -86,7 +86,7 @@ class Scoreboard:
     def __init__(self, overview, data):
         time_format = data.config.time_format
         linescore = overview.linescore
-
+        
         away = linescore.teams.away
         away_abbrev = data.teams_info[away.team.id].abbreviation
         self.away_roster = data.teams_info[away.team.id].roster
@@ -173,6 +173,7 @@ class Scoreboard:
             self.periods.ordinal,
             self.periods.clock
         )
+        print(output)
         return output
 
 class Goal:

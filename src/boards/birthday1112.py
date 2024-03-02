@@ -20,11 +20,14 @@ class Birthday1112:
         self.age = 0
         self.who = "Owen"
         self.birthday = datetime.date( 2010, 11, 12 )
+        #self.bday_image = Image.open(get_file('assets/images/bday1112.jpg')).resize((64,64))
+        self.bday_image = Image.open(get_file('assets/images/32owen_roar.gif')).resize((64,64))
         self.bday_image = Image.open(get_file('assets/images/bday1112.jpg')).resize((64,64))
         self.scroll_pos = self.matrix.width
 
     def draw(self):
         
+        debug.info(f"{self.who} {self.birthday} Birthday countdown board launched")
         debug.info("Birthday countdown board launched")
         self.calc_days_to_birthday()
         #for testing purposes
@@ -37,6 +40,8 @@ class Birthday1112:
             self.birthday_today()
         else:
             #today is not birthday
+            if self.days_to_birthday < 100:
+                self.birthday_countdown()
             self.birthday_countdown()
 
     def calc_days_to_birthday(self):
