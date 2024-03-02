@@ -6,7 +6,7 @@ PATH = "assets/loading/loading.png"
 class Loading:
     def __init__(self, matrix):
         self.matrix = matrix
-        self.image = Image.open(PATH)
+        self.image = Image.open(PATH).resize((128,64))
     def render(self):
 
         self.matrix.draw_image(
