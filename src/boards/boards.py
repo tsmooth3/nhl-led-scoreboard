@@ -17,21 +17,16 @@ from boards.christmas import Christmas
 from boards.seasoncountdown import SeasonCountdown
 from boards.wxForecast import wxForecast
 from boards.screensaver import screenSaver
-from boards.seasoncountdown import SeasonCountdown
 from boards.stanley_cup_champions import StanleyCupChampions
 from boards.ovigoals import OviGoals
 from boards.freedom import Freedom
 from boards.birthday0115 import Birthday0115
 from boards.birthday0201 import Birthday0201
-from boards.birthday0306 import Birthday0306
 from boards.birthday0330 import Birthday0330
 from boards.birthday0403 import Birthday0403
 from boards.birthday0727 import Birthday0727
 from boards.birthday1001 import Birthday1001
 from boards.birthday1112 import Birthday1112
-from boards.bears import Bears
-from boards.streamlabs import StreamLabs
-from boards.easter import Easter
 from time import sleep
 
 
@@ -291,9 +286,6 @@ class Boards:
     def birthday0201(self, data, matrix,sleepEvent):
         Birthday0201(data, matrix, sleepEvent).draw()
     
-    def birthday0306(self, data, matrix,sleepEvent):
-        Birthday0306(data, matrix, sleepEvent).draw()
-
     def birthday0330(self, data, matrix,sleepEvent):
         Birthday0330(data, matrix, sleepEvent).draw()
 
@@ -308,16 +300,3 @@ class Boards:
 
     def birthday1112(self, data, matrix,sleepEvent):
         Birthday1112(data, matrix, sleepEvent).draw()
-    
-    def seasoncountdown(self, data, matrix,sleepEvent):
-        SeasonCountdown(data, matrix, sleepEvent).draw()
-    
-    def streamlabs(self, data, matrix,sleepEvent):
-        StreamLabs(data, matrix, sleepEvent).draw()
-    
-    def bears(self, data, matrix,sleepEvent):
-        Bears(data, matrix, sleepEvent).draw()
-    
-    def easter(self, data, matrix,sleepEvent):
-        Easter(data, matrix, sleepEvent).draw()
-

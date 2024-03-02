@@ -39,8 +39,6 @@ def game_status_info():
 def current_season_info():
     return nhl_api.info.current_season()
 
-def next_season_info():
-    return nhl_api.info.next_season()
 
 def standings():
     standings, wildcard = nhl_api.info.standings()

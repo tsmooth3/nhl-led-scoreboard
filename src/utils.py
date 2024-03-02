@@ -26,18 +26,6 @@ def stop_splash_service():
 
 def get_lat_lng(location):
 
-    if len(location) > 0:
-    
-        g = geocoder.osm(location)
-            
-        if not g.ok:
-            #debug.error("Unable to find {} with Open Street Map, falling back to IP lookup for location.  Error: {}".format(location,e))
-            # error_message = "Unable to find {} with Open Street Map, falling back to IP lookup for location.".format(location)
-            g = geocoder.ip('me')
-            #debug.info("location is: " + g.city + ","+ g.country + " " + str(g.latlng))
-            message = "Unable to find [{}] with Open Street Map".format(location)
-        else:
-            message = "location is: " + location + " " + str(g.latlng)
     #Check to see if a location.json is in the config folder
     reload = False
     ipfallback = False

@@ -36,8 +36,7 @@ class Christmas:
 
         else:
             #today is not Christmas
-            if self.days_to_xmas <= 100: 
-                self.xmas_countdown()
+            self.xmas_countdown()
   
     def calc_days_to_xmas(self):
         #get today's date
