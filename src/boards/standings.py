@@ -8,8 +8,8 @@ class Standings:
         TODO: Change draw standings to use new matrix layout system
     """
     def __init__(self, data, matrix,sleepEvent):
-        #self.conferences = ["eastern", "western"]
-        self.divisions = ["west", "east", "north", "central"]
+        self.conferences = ["eastern", "western"]
+        self.divisions = ["metropolitan", "atlantic", "central", "pacific"]
         self.data = data
         self.matrix = matrix
         self.team_colors = data.config.team_colors
@@ -17,13 +17,7 @@ class Standings:
         self.sleepEvent.clear()
 
     def render(self):
-        self.matrix.clear()
-
-        
-        #type = self.data.config.standing_type 
-
-        #For 2021 season, the league only uses divisions, so I'm forcing the type to divisons. 
-        type = 'division'
+        type = self.data.config.standing_type
         if self.data.config.preferred_standings_only:
             if type == 'conference':
                 conference = self.data.config.preferred_conference
@@ -73,7 +67,7 @@ class Standings:
                 self.sleepEvent.wait(5)
 
             elif type == 'wild_card':
-                
+                print("hello")
                 wildcard_records = {}
                 conf_name = self.data.config.preferred_conference
                 conf_data = getattr(self.data.standings.by_wildcard, conf_name)
@@ -174,8 +168,7 @@ class Standings:
                     #sleep(5)
                     self.sleepEvent.wait(5)
             elif type == 'wild_card':
-                debug.info("wild card standings not available, please change the type of standings to 'conference' or 'division' in your config")
-                """ wildcard_records = {}
+                wildcard_records = {}
                 for conf_name, conf_data in vars(self.data.standings.by_wildcard).items():
                     wildcard_records["conference"] = conf_name
                     division_leaders = {}
@@ -185,18 +178,15 @@ class Standings:
                         else:
                             for div_name, div_record in vars(value).items():
                                 division_leaders[div_name] = div_record
-
                             wildcard_records["division_leaders"] = division_leaders
-
                     # initialize the number_of_rows at 10 (conference name + 2x Division name + wildcard title + 6x Division leaders record)
                     number_of_rows = 10 + len(wildcard_records["wild_card"])
-
                     # Space between each table in row of LED
                     table_offset = 3
-
                     # Total Height in row of LED. each record and table titles need 7 row of LED plus the space between each tables (3 tables means 2 space between each)
                     img_height = (number_of_rows * 14) + (table_offset * 2)
 
+                    img_height = (number_of_rows * 7) + (table_offset * 2)
                     # Increment to move image up
                     i = 0
                     image = draw_wild_card(self.data, wildcard_records, self.matrix.width, img_height, table_offset)
@@ -212,7 +202,7 @@ class Standings:
                         #sleep(0.2)
                         self.sleepEvent.wait(0.2)
                     #sleep(5)
-                    self.sleepEvent.wait(5) """
+                    self.sleepEvent.wait(5)
 
 
 def draw_standing(data, name, records, img_height, width):
@@ -227,7 +217,7 @@ def draw_standing(data, name, records, img_height, width):
     # Create a new data image.
     image = Image.new('RGB', (width, img_height))
     draw = ImageDraw.Draw(image)
-    team_colors = data.config.team_colors
+
     """
         Each record info is shown in a row of 7 pixel high. The initial row start at pixel 0 (top screen). For each
         team's record we add an other row and increment the row position by the height of a row plus the
@@ -239,6 +229,8 @@ def draw_standing(data, name, records, img_height, width):
     div_bg_color = team_colors.color("{}.primary".format(name))
     draw.rectangle((0,0,127,12), fill=(div_bg_color['r'], div_bg_color['g'], div_bg_color['b']))
     draw.text((1, 0), name, font=layout.font_medium, fill=(0,0,0))
+
+    draw.text((1, 0), name, font=layout.font)
     row_pos += row_height
 
     for team in records:
@@ -248,6 +240,7 @@ def draw_standing(data, name, records, img_height, width):
         wins = team['leagueRecord']['wins']
         losses = team['leagueRecord']['losses']
         ot = team['leagueRecord']['ot']
+        team_colors = data.config.team_colors
         bg_color = team_colors.color("{}.primary".format(team_id))
         txt_color = team_colors.color("{}.text".format(team_id))
         draw.rectangle([0, top + row_pos, 24, row_pos], fill=(bg_color['r'], bg_color['g'], bg_color['b']))

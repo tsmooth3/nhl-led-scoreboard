@@ -27,8 +27,7 @@ import os
 
 SCRIPT_NAME = "NHL-LED-SCOREBOARD"
 
-SCRIPT_VERSION = "1.6.3"
-
+SCRIPT_VERSION = "1.6.7"
 
 def run():
     # Kill the splash screen if active
@@ -148,7 +147,6 @@ def run():
         pushbuttonThread.daemon = True
         pushbuttonThread.start()
     
-
     MainRenderer(matrix, data, sleepEvent).render()
 
 

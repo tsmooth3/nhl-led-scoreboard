@@ -4,6 +4,8 @@ from utils import center_text
 from datetime import datetime, date
 import debug
 import requests
+import datetime
+import debug
 from time import sleep
 from utils import get_file
 
@@ -35,6 +37,11 @@ class SeasonCountdown:
     
         self.nextseason="{0}-{1}".format(current_year,next_year)
         self.nextseason_short="NHL {0}-{1}".format(str(current_year)[-2:],str(next_year)[-2:])
+        self.font.large = data.config.layout.font_large_2
+        # Current season seems to not update until pre-season start so I will have to modify the Status and the nhl_api to get the coming season.
+        self.season_start = datetime.date(2021,10,12)
+        self.days_until_season = (self.season_start - datetime.date.today()).days
+        self.scroll_pos = self.matrix.width
 
     def draw(self):
         
@@ -47,6 +54,8 @@ class SeasonCountdown:
 
         if self.days_until_season <= 0:
             debug.info("It's NHL Season Time!")
+            self.season_start_today()
+
         else:
             self.season_countdown()
   
@@ -69,6 +78,7 @@ class SeasonCountdown:
         self.matrix.draw_text(
             (14,25), 
             self.nextseason, 
+            "2021-2022", 
             font=self.font,
             fill=(0,0,0),
             backgroundColor=(155,155,155)
@@ -87,6 +97,13 @@ class SeasonCountdown:
         #self.matrix.draw_image((-5,0), black_gradiant)
         
         debug.info("Counting down to {0}".format(self.nextseason_short))
+        nhl_logo = Image.open(get_file('assets/logos/_local/nhl_logo_64x32.png'))
+        black_gradiant = Image.open(get_file('assets/images/64x32_scoreboard_center_gradient.png'))
+
+        self.matrix.draw_image((34,0), nhl_logo)
+        self.matrix.draw_image((-5,0), black_gradiant)
+        
+        debug.info("Counting down to NHL 21-22")
 
         self.matrix.render()
         self.sleepEvent.wait(0.5)
@@ -97,6 +114,10 @@ class SeasonCountdown:
             str(self.days_until_season),
              font=self.font.large2,
              fill=(252,15,30)
+            (1,2),
+            str(self.days_until_season),
+             font=self.font.large,
+             fill=(255,165,0)
         )
         
         self.matrix.render()
@@ -108,6 +129,10 @@ class SeasonCountdown:
             "DAYS til", 
             font=self.font.large,
             fill=(252,15,30)
+            (1,18), 
+            "DAYS til", 
+            font=self.font,
+            fill=(255,165,0)
         )
 
         self.matrix.render()
@@ -118,9 +143,13 @@ class SeasonCountdown:
             (10,45), 
             self.nextseason_short, 
             font=self.font.large,
+            (1,25), 
+            "NHL 21-22", 
+            font=self.font,
             fill=(0,0,0),
             backgroundColor=(155,155,155)
         )
 
         self.matrix.render()
+        self.sleepEvent.wait(15)
         self.sleepEvent.wait(15)

@@ -43,10 +43,8 @@ def next_season_info():
     return nhl_api.info.next_season()
 
 def standings():
-    # standings, wildcard = nhl_api.info.standings()
-    # return nhl_api.info.Standings(standings, wildcard)
-    standings = nhl_api.info.standings()
-    return nhl_api.info.Standings(standings)
+    standings, wildcard = nhl_api.info.standings()
+    return nhl_api.info.Standings(standings, wildcard)
 
 
 def playoff(season = ""):

@@ -50,6 +50,7 @@ class MainRenderer:
             Clock(self.data, self.matrix, self.sleepEvent, duration=60)
             self.data.refresh_data()
 
+
         while True:
             debug.info('Rendering...')
 
@@ -59,6 +60,12 @@ class MainRenderer:
             #    self.__render_offday()
             #elif self.data.config.testScChampions:
             #    self.test_stanley_cup_champion(self.data.config.testScChampions)
+            #if self.status.is_offseason(self.data.date()):
+                # Offseason (Show offseason related stuff)
+                #debug.info("It's offseason")
+                #self.__render_offday()
+            if self.data.config.testScChampions:
+                self.test_stanley_cup_champion(self.data.config.testScChampions)
 
             #else:
                 # Season.

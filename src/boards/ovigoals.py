@@ -6,7 +6,9 @@ import debug
 import requests
 from time import sleep
 from utils import get_file
-#import nhl_api.data
+from time import sleep
+from utils import get_file
+import nhl_api.data
 
 class OviGoals:
     def __init__(self, data, matrix,sleepEvent):
@@ -18,6 +20,7 @@ class OviGoals:
         self.font.large = data.config.layout.font_large_2
         self.font.medium = data.config.layout.font_medium
         self.font.scroll = data.config.layout.font_xmas
+        self.days_to_xmas = 0
         self.scroll_pos = self.matrix.width
 
     def draw(self):
@@ -61,6 +64,13 @@ class OviGoals:
             countdowntext = "BEST )))" 
             countdowntext2 = "+" + str(goalsTo1st * -1 + 1)
 
+        odata = nhl_api.data.get_ovi_goals()
+        oparsed = odata.json()
+        goalcount = oparsed["stats"][0]["splits"][0]["stat"]['goals']
+        #for testing
+        #goalcount = 799
+        debug.info(str(goalcount) + " Ovi Goals")
+        
         if self.matrix.width == 128:
             debug.info("Drawing 128x64 Ovi")
             ovi_image = Image.open(get_file('assets/images/128ovi_goals.png'))
@@ -70,6 +80,8 @@ class OviGoals:
             self.matrix.draw_text(
                 (56,2), 
                 "OVI GOALS", 
+                (68,2), 
+                "OVECHKIN", 
                 font=self.font.medium,
                 fill=(255,255,255)
             )
@@ -77,6 +89,7 @@ class OviGoals:
 	    #draw ovi goal count
             self.matrix.draw_text(
                 (68,18),
+                (78,22),
                 str(goalcount),
                 font=self.font.large,
                 fill=(255,0,0)
@@ -97,6 +110,11 @@ class OviGoals:
                 fill=(255,255,0)
             )
             self.matrix.image.save('/home/pi/pbjelly/ovi.png')
+                (78,52), 
+                "GOALS", 
+                font=self.font.medium,
+                fill=(255,255,255)
+            )
         else: 
             debug.info("Drawing 64x32 Ovi")
             ovi_image = Image.open(get_file('assets/images/ovi_goals.png'))

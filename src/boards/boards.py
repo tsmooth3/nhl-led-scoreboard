@@ -14,6 +14,7 @@ from boards.pbdisplay import pbDisplay
 from boards.wxWeather import wxWeather
 from boards.wxAlert import wxAlert
 from boards.christmas import Christmas
+from boards.seasoncountdown import SeasonCountdown
 from boards.wxForecast import wxForecast
 from boards.screensaver import screenSaver
 from boards.seasoncountdown import SeasonCountdown
@@ -236,9 +237,14 @@ class Boards:
         Scoreticker(data, matrix, sleepEvent).render()
 
     def seriesticker(self, data, matrix,sleepEvent):
-        if data.status.is_playoff(data.today, data.playoffs):
+        '''
+            forcing it to show since the playoff start and regular season end are in conflict for 2021
+        '''
+        Seriesticker(data, matrix, sleepEvent).render()
+        '''if data.status.is_playoff(data.today, data.playoffs):
             Seriesticker(data, matrix, sleepEvent).render()
-    
+        '''  
+
     def stanley_cup_champions(self, data, matrix,sleepEvent):
         StanleyCupChampions(data, matrix, sleepEvent).render()
 
@@ -267,11 +273,11 @@ class Boards:
     def screensaver(self, data, matrix,sleepEvent):
         screenSaver(data, matrix, sleepEvent)
 
-#    def covid_19(self, data, matrix,sleepEvent):
-#        Covid_19(data, matrix, sleepEvent)
-
     def christmas(self, data, matrix,sleepEvent):
         Christmas(data, matrix, sleepEvent).draw()
+
+    def seasoncountdown(self, data, matrix,sleepEvent):
+        SeasonCountdown(data, matrix, sleepEvent).draw()
 
     def ovigoals(self, data, matrix,sleepEvent):
         OviGoals(data, matrix, sleepEvent).draw()
