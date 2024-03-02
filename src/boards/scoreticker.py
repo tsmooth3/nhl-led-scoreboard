@@ -22,18 +22,14 @@ class Scoreticker:
         self.index = 0
         self.games = self.data.other_games()
         self.num_games = len(self.games)
-        for g in self.games:
-            print(f"game: {g}")
         try:
             while not self.sleepEvent.is_set():
                 self.matrix.clear()
                 if self.index >= (len(self.games)):
                     return
                     
-                sr = ScoreboardRenderer(self.data, self.matrix, Scoreboard(self.games[self.index], self.data))
-                sr.render()
+                ScoreboardRenderer(self.data, self.matrix, Scoreboard(self.games[self.index], self.data)).render()
                 self.show_indicator()
-                #self.matrix.image.save(f"/home/pi/pbjelly/game{self.index}.png")
                 self.matrix.render()
 
                 if self.data.network_issues:
