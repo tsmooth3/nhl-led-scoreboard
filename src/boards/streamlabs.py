@@ -92,7 +92,7 @@ class StreamLabs:
         #fRemaining = int(filterObj['capacity'] - (usage1*.72))
         sRemaining = int(softenerObj['capacity'] - (usage2*.72))
         #print(res1.json())
-        print(res2.json())
+        #print(res2.json())
         
         self.matrix.draw_rectangle((0,0),(128,64),(32,55,65))
         self.matrix.draw_image((0,-1), streamlabs_image)
@@ -114,10 +114,10 @@ class StreamLabs:
             rVols.append({'date':rDate,'seg':segment,'vol':0,'dayTotal':0})
 
             # add the volume to current segment
-            print(rVols)
+            # print(rVols)
             segmentVol += rVol
             dayTotal += rVol
-            print(f"index: {index}")
+            #print(f"index: {index}")
             rVols[index]['date']=rDate
             rVols[index]['seg']=segment
             rVols[index]['vol']=segmentVol

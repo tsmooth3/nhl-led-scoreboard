@@ -26,7 +26,7 @@ class Birthday1112:
 
     def draw(self):
         
-        debug.info("Birthday countdown board launched")
+        debug.info(f"{self.who} {self.birthday} Birthday countdown board launched")
         self.calc_days_to_birthday()
         #for testing purposes
         #self.days_to_birthday = 0

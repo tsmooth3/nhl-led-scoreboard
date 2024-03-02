@@ -22,12 +22,13 @@ class Birthday0306:
         self.who = "Jack"
         self.birthday = datetime.date( 2023, 3, 6 )
         #self.bday_image = Image.open(get_file('assets/images/jack-jack.jpg')).resize((64,64))
-        self.bday_image = Image.open(get_file('assets/images/jack.jpg')).resize((64,64))
+        #self.bday_image = Image.open(get_file('assets/images/jack.jpg')).resize((64,64))
+        self.bday_image = Image.open(get_file('assets/images/bday0306.jpg')).resize((64,64))
         self.scroll_pos = self.matrix.width
 
     def draw(self):
         
-        debug.info("Birthday countdown board launched")
+        debug.info(f"{self.who} {self.birthday} Birthday countdown board launched")
         self.calc_days_to_birthday()
         #for testing purposes
         #self.days_to_birthday = 0
