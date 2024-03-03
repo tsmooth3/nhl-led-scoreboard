@@ -97,7 +97,7 @@ class Freedom:
             #choose one of three daily images to draw based on days to xmas and draw it
             if t_now % 3 == 0:
                 if t_now % 2 == 0:
-                    freedom_image = Image.open(get_file('assets/images/giphy.gif'))
+                    freedom_image = Image.open(get_file('assets/images/fireworks.gif'))
                     x_pos = 0
                     y_pos = 0
                 else:

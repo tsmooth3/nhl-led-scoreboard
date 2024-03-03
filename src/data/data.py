@@ -3,14 +3,14 @@
         single one.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from time import sleep
 import debug
 import nhl_api
 from data.playoffs import Series
 from data.status import Status
-from utils import get_lat_lng
-
+from utils import get_lat_lng, convert_time
+import json
 
 NETWORK_RETRY_SLEEP_TIME = 0.5
 
@@ -21,7 +21,23 @@ def filter_list_of_games(games, teams):
     """
     Filter the list 'games' and keep only the games which the teams in the list 'teams' are part of.
     """
-    return list(game for game in set(games) if {game.away_team_id, game.home_team_id}.intersection(set(teams)))
+    # print(games)
+    # print(game['awayTeam']['id'], game['homeTeam']['id'])
+    pref_games = []
+    index = []
+    prev_index = 0
+    for game in games:
+        if game["homeTeam"]["id"] in teams:
+            index.append(teams.index(game["homeTeam"]["id"]))
+            pref_games.append(game)
+        elif game["awayTeam"]["id"] in teams:
+            pref_games.append(game)
+            index.append(teams.index(game["awayTeam"]["id"]))
+    pref_games = [x for _,x in sorted(zip(index,pref_games))]
+    # return list(game for game in games if {game['awayTeam']['id'], game['homeTeam']['id']}.intersection(set(30)))
+    return pref_games
+
+    # return list(game for game in set(games) if {game.away_team_id, game.home_team_id}.intersection(set(teams)))
 
 def filter_list_of_series(series, teams):
     """
@@ -44,9 +60,8 @@ def prioritize_pref_games(games, teams):
 
     TODO: For V2, this needs to be changed to return game list in different order, instead of a single way. Having that handled by different methods is the way.... this is the way !!!!
     """
-
     ordered_game_list = map(lambda team: next(
-        (game for game in games if game.away_team_id == team or game.home_team_id == team), None),
+        (game for game in games if game.away_team.id == team or game.home_team.id == team), None),
                             teams)
     cleaned_game_list = list(filter(None, list(dict.fromkeys(ordered_game_list))))
     return cleaned_game_list
@@ -131,7 +146,11 @@ class Data:
         self.network_issues = False
 
         # Get the teams info
-        self.teams = self.get_teams()
+        self.teams_info = self.get_teams()
+        # So oddly enough, there are a handful of situations where the API does not include the team_id
+        # it's happening often enough that it's worth keeping a second teams_info that is keyed off of the
+        # abbreviation instead of the the id
+        self.teams_info_by_abbrev = self.get_teams_by_code()
 
         # Save the parsed config
         self.config = config
@@ -142,9 +161,6 @@ class Data:
 
         # Flag for when the data live feed of a game has updated
         self.new_data = True
-
-        # Get each team's data from the teams info
-        self.get_teams_info()
 
         # Get the status from the API
         self.get_status()
@@ -177,21 +193,19 @@ class Data:
         self.stanleycup_round = False
 
         # Fetch the playoff data
-        self.refresh_playoff()
+        # self.refresh_playoff()
 
         # Stanley cup champions
-        self.ScChampions_id = self.check_stanley_cup_champion()
-
+        # self.cup_winner_id = self.check_stanley_cup_champion()
 
     #
     # Date
-
     def __parse_today(self):
         today = datetime.today()
         noon = datetime.strptime("12:00", "%H:%M").replace(year=today.year, month=today.month,
                                                         day=today.day)
-        end_of_day = datetime.strptime(self.config.end_of_day, "%H:%M").replace(year=today.year, month=today.month,
-                                                                                day=today.day)
+        #end_of_day = datetime.strptime(self.config.end_of_day, "%H:%M").replace(year=today.year, month=today.month,day=today.day)
+        end_of_day = datetime.strptime("03:00", "%H:%M").replace(year=today.year, month=today.month,day=today.day)
         if noon < end_of_day < datetime.now() and datetime.now() > noon:
             today += timedelta(days=1)
         elif end_of_day > datetime.now():
@@ -224,11 +238,14 @@ class Data:
             # Reset flag
             self.all_pref_games_final = False
             
-            self.refresh_daily()
-            
+            #Don't think this is needed to be called a second time
+           #self.refresh_daily()           
+            #self.status.refresh_next_season()
+           
             return True
         else:
             debug.info("It is not a new day")
+                        
             return False
 
     #
@@ -238,7 +255,7 @@ class Data:
         attempts_remaining = 5
         while attempts_remaining > 0:
             try:
-                teams = nhl_api.teams()
+                teams = nhl_api.info.team_info()
                 self.network_issues = False
                 return teams
 
@@ -248,6 +265,12 @@ class Data:
                 debug.error(error_message)
                 attempts_remaining -= 1
                 sleep(NETWORK_RETRY_SLEEP_TIME)
+
+    def get_teams_by_code(self):
+        teams_data = {}
+        for team in self.teams_info.values():
+            teams_data[team.details.abbrev] = team
+        return teams_data
 
     def refresh_games(self):
         """
@@ -263,17 +286,33 @@ class Data:
             TODO:
                 Add the option to start the earliest game in the preferred game list but change to the top one as soon as it start.
         """
+
         attempts_remaining = 5
         while attempts_remaining > 0:
             try:
-                self.games = nhl_api.day(self.year, self.month, self.day)
+                data = nhl_api.data.get_score_details("{}-{}-{}".format(str(self.year), str(self.month).zfill(2), str(self.day).zfill(2)))
+                if not data:
+                    self.games = []
+                    self.pref_games = []
+                    return data
+
+                self.games = data["games"]
                 self.pref_games = filter_list_of_games(self.games, self.pref_teams)
+                # Populate the TeamInfo classes used for the team_summary board
+                for team_id in self.pref_teams:
+                    # import pdb; pdb.set_trace()
+                    team_info = self.teams_info[team_id].details
+                    pg, ng = nhl_api.info.team_previous_game(team_info.abbrev, str(date.today()))
+                    team_info.previous_game = pg
+                    team_info.next_game = ng
+
                 if self.config.preferred_teams_only and self.pref_teams:
                     self.games = self.pref_games
-                if not self.is_pref_team_offday() and self.config.live_mode:
-                    self.pref_games = prioritize_pref_games(self.pref_games, self.pref_teams)
-                    self.check_all_pref_games_final()
 
+                if not self.is_pref_team_offday() and self.config.live_mode:
+                    #self.pref_games = prioritize_pref_games(self.pref_games, self.pref_teams)
+                    self.check_all_pref_games_final()
+                    # TODO: This shouldn't be needed to get the fact that your preferred team has a game today
                     self.check_game_priority()
 
                 self.network_issues = False
@@ -310,29 +349,33 @@ class Data:
             [7:00, 7:00, 8:00, 10:00]
         """
 
-        self.current_game_id = self.pref_games[0].game_id
-        earliest_start_time = datetime.strptime(self.pref_games[0].game_date, '%Y-%m-%dT%H:%M:%SZ')
-        print('checking highest priority game')
+        if len(self.pref_games) == 0:
+            return
+        
+        self.current_game_id = self.pref_games[0]["id"]
+        earliest_start_time = datetime.strptime(self.pref_games[0]["startTimeUTC"], '%Y-%m-%dT%H:%M:%SZ')
+        #for g in self.pref_games:
+        #    if earliest_start_time > datetime.strptime(g["startTimeUTC"], '%Y-%m-%dT%H:%M:%SZ'):
+        #        earliest_start_time = datetime.strptime(g["startTimeUTC"], '%Y-%m-%dT%H:%M:%SZ')
+        debug.info('checking highest priority game')
         for g in self.pref_games:
-            if not self.status.is_final(g.status):
+            if not self.status.is_final(g["gameState"]) and not g["gameState"]=="OFF":
                 # If the game started.
-                if datetime.strptime(g.game_date, '%Y-%m-%dT%H:%M:%SZ') <= datetime.utcnow():
-                    print('Showing highest priority live game. {} vs {}'.format(g.away_team_name, g.home_team_name))
-                    self.current_game_id = g.game_id
-                    print(self.current_game_id)
+                if datetime.strptime(g["startTimeUTC"],'%Y-%m-%dT%H:%M:%SZ') <= datetime.utcnow():
+                    debug.info('Showing highest priority live game. {} vs {}'.format(g["awayTeam"]["name"]["default"], g["homeTeam"]["name"]["default"]))
+                    self.current_game_id = g["id"]
                     return
                 # If the game has not started but is ealier then the previous set game
-                if datetime.strptime(g.game_date, '%Y-%m-%dT%H:%M:%SZ') < earliest_start_time:
-                    earliest_start_time = datetime.strptime(g.game_date, '%Y-%m-%dT%H:%M:%SZ')
-                    self.current_game_id = g.game_id
-                    print('Showing earliest game. {} vs {}'.format(g.away_team_name, g.home_team_name))
-                    earliest = True
+                if datetime.strptime(g["startTimeUTC"], "%Y-%m-%dT%H:%M:%SZ") < earliest_start_time:
+                    earliest_start_time = datetime.strptime(g["startTimeUTC"], '%Y-%m-%dT%H:%M:%SZ')
+                    self.current_game_id = g["id"]
+                    debug.info('Showing earliest game. {} vs {}'.format(g["awayTeam"]["name"]["default"], g["homeTeam"]["name"]["default"]))
 
     def other_games(self):
         if not self.is_pref_team_offday() and self.config.live_mode:
             game_list = []
             for g in self.games:
-                if g.game_id != self.current_game_id:
+                if g["id"] != self.current_game_id:
                     game_list.append(g)
 
             return game_list
@@ -340,7 +383,7 @@ class Data:
 
     def check_all_pref_games_final(self):
         for game in self.pref_games:
-            if game.status != "Final":
+            if game["gameState"] != "OFF" or game["gameState"] != "FINAL":
                 return
 
         self.all_pref_games_final = True
@@ -351,7 +394,7 @@ class Data:
         attempts_remaining = 5
         while attempts_remaining > 0:
             try:
-                print("getting status")
+                debug.info("getting status")
                 self.status = Status()
                 break
 
@@ -368,16 +411,15 @@ class Data:
 
     def refresh_overview(self):
         """
-            Get a all the data of the main event.
-        :return:
+            Get all the data of the main event.
         """
         attempts_remaining = 5
         while attempts_remaining > 0:
             try:
-                print("ping")
                 self.overview = nhl_api.overview(self.current_game_id)
-                if self.time_stamp != self.overview.time_stamp:
-                    self.time_stamp = self.overview.time_stamp
+                # TODO: Not sure what was going on here
+                if self.time_stamp != self.overview["clock"]["timeRemaining"]:
+                    self.time_stamp = self.overview["clock"]["timeRemaining"]
                     self.new_data = True
                 self.needs_refresh = False
                 self.network_issues = False
@@ -389,6 +431,18 @@ class Data:
                 attempts_remaining -= 1
                 sleep(NETWORK_RETRY_SLEEP_TIME)
 
+
+
+    # TODO: Should probably move this into it's own TestClass of sorts
+    def test_goal(self, data, matrix, sleepEvent):
+        from data.scoreboard import Scoreboard
+        from renderer.goal import GoalRenderer
+        # f = open('test_scenarios/goal.json')
+        f = open('test_scenarios/goal_unassisted.json')
+        parsed = json.load(f)
+        overview = PlayByPlay.from_dict(parsed)
+        scoreboard = Scoreboard(overview, data)
+        GoalRenderer(data, matrix, sleepEvent, scoreboard.home_team).render()
 
     """
         TODO: TO DELETE if the new check_game_priority() function works withtout a fuzz
@@ -423,21 +477,8 @@ class Data:
                 self.network_issues = True
                 debug.error("Failed to refresh the Standings. {} attempt remaining.".format(attempts_remaining))
                 debug.error(error_message)
-                attempts_remaining -= 1
-                sleep(NETWORK_RETRY_SLEEP_TIME)
-
     #
     # Teams
-
-    def get_teams_info(self):
-        try:
-            info_by_id = {}
-            for team in self.teams:
-                info_by_id[team.team_id] = team
-
-            self.teams_info = info_by_id
-        except TypeError:
-            self.teams_info = []
 
     def get_pref_teams_id(self):
         """
@@ -446,28 +487,23 @@ class Data:
 
         :return: list of the preferred team's ID in order
         """
-        try:
-            allteams = self.teams
-            pref_teams = self.config.preferred_teams
-            allteams_id = {}
-            pref_teams_id = []
-            # Put all the team's in a dict with there name as KEY and ID as value.
-            for team in allteams:
-                allteams_id[team.team_name] = team.team_id
+        pref_teams = self.config.preferred_teams
+        allteams_id = {}
+        pref_teams_id = []
+        # Put all the team's in a dict with there name as KEY and ID as value.
+        for team_id, team in self.teams_info.items():
+            allteams_id[team.details.name] = team_id
 
-            # Go through the list of preferred teams name. If the team's name exist, put the ID in a new list.
-            if pref_teams:
-                for team in pref_teams:
-                    if team in allteams_id:
-                        pref_teams_id.append(allteams_id[team])
-                    else:
-                        debug.warning(team + " is not a team of the NHL. Make sure you typed team's name properly")
+        # Go through the list of preferred teams name. If the team's name exist, put the ID in a new list.
+        if pref_teams:
+            for team in pref_teams:
+                #Search for the team in the key
+                res = {key: val for key, val in allteams_id.items() if team in key}
+                pref_teams_id.append(list(res.values())[0])
 
-                return pref_teams_id
-            else:
-                return False
-        except TypeError:
-            return []
+            return pref_teams_id
+        else:
+            return False
 
     #
     # Playoffs
@@ -478,6 +514,9 @@ class Data:
             TODO:
                 Add a refresh function to the Series object instead and trigger a refresh only at specific time in the renderer.(End of a game, new day)
         """
+        self.current_round = None
+        self.current_round_name = None
+        self.stanleycup_round = None
         attempts_remaining = 5
         while attempts_remaining > 0:
             try:
@@ -530,8 +569,7 @@ class Data:
             for x in range(len(self.current_round.series[0].matchupTeams)):
                 if self.current_round.series[0].matchupTeams[x].seriesRecord.wins >= 4:
                     return self.current_round.series[0].matchupTeams[x].team.id
-                else:
-                    return False
+                return
 
     def series_by_conference():
         """
@@ -543,20 +581,14 @@ class Data:
     # Offdays
 
     def is_pref_team_offday(self):
-        try:
-            return not len(self.pref_games)
-        except:
-            return True
+        return len(self.pref_games) == 0
 
     def is_nhl_offday(self):
-        try:
-            return not len(self.games) and not len(self.pref_games)
-        except:
-            return True
+        return len(self.games) == 0
 
     def refresh_data(self):
 
-        debug.log("refresing data")
+        debug.info("refreshing data")
         # Flag to determine when to refresh data
         self.needs_refresh = True
 
@@ -570,15 +602,15 @@ class Data:
         self.refresh_games()
 
     def refresh_daily(self):
-        print('refreshing data')
-        # Get the teams info
-        self.teams = self.get_teams()
+        debug.info('refreshing daily data')
+        self.teams_info = self.get_teams()
+        self.teams_info_by_abbrev = self.get_teams_by_code()
         
-        # Update team's data
-        self.get_teams_info()
-
         # Update standings
         self.refresh_standings()
 
         # Fetch the playoff data
         self.refresh_playoff()
+        
+ 
+        

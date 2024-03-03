@@ -19,6 +19,20 @@
       	"boards_list": {
           	"enum": [
               "wxalert",
+              "freedom",
+              "streamlabs",
+              "easter",
+              "bday0115",
+              "bday0201",
+              "bday0306",
+              "bday0330",
+              "bday0403",
+              "bday0503",
+              "bday0727",
+              "bday0803",
+              "bday1001",
+              "bday1112",
+              "ovigoals",
               "wxforecast",
               "scoreticker",
               "seriesticker",
@@ -412,9 +426,9 @@
             "examples": [
                 {
                     "standings": {
-                        "standing_type": "wild_card",
+                        "standing_type": "division",
                         "preferred_standings_only": true,
-                        "divisions": "north",
+                        "divisions": "atlantic",
                         "conference": "eastern"
                     },
                     "clock": {
@@ -523,9 +537,9 @@
                     "default": {},
                     "examples": [
                         {
-                            "divisions": "north",
+                            "divisions": "atlantic",
                             "conference": "eastern",
-                            "standing_type": "wild_card",
+                            "standing_type": "division",
                             "preferred_standings_only": true
                         }
                     ],
@@ -554,7 +568,7 @@
                             "description": "Option to choose the type of standings to display. conference if set by default.",
                             "default": "conference",
                             "examples": [
-                                "wild_card"
+                                "division"
                             ],
                             "enum": [
                                 "conference",
@@ -565,16 +579,13 @@
                         "divisions": {
                             "$id": "#/properties/boards/properties/standings/properties/divisions",
                             "type": "string",
-                            "title": "divisions (north, central, east, west)",
+                            "title": "divisions (central, atlantic, metropolitan, pacific)",
                             "description": "Your preferred division",
                             "default": "",
                             "examples": [
-                                "north"
+                                "atlantic"
                             ],
                             "enum": [
-                                "north",
-                                "east",
-                                "west",
                                 "central",
                                 "atlantic",
                                 "metropolitan",

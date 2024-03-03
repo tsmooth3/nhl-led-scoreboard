@@ -17,6 +17,20 @@ from boards.christmas import Christmas
 from boards.seasoncountdown import SeasonCountdown
 from boards.wxForecast import wxForecast
 from boards.screensaver import screenSaver
+from boards.ovigoals import OviGoals
+from boards.bday0115 import Bday0115
+from boards.bday0201 import Bday0201
+from boards.bday0306 import Bday0306
+from boards.bday0330 import Bday0330
+from boards.bday0403 import Bday0403
+from boards.bday0503 import Bday0503
+from boards.bday0727 import Bday0727
+from boards.bday0803 import Bday0803
+from boards.bday1001 import Bday1001
+from boards.bday1112 import Bday1112
+from boards.streamlabs import StreamLabs
+from boards.easter import Easter
+from boards.freedom import Freedom
 from boards.stanley_cup_champions import StanleyCupChampions
 from boards.ovigoals import OviGoals
 from boards.freedom import Freedom
@@ -29,31 +43,32 @@ from boards.birthday1001 import Birthday1001
 from boards.birthday1112 import Birthday1112
 from time import sleep
 
+import traceback
 
 class Boards:
     def __init__(self):
         pass
 
     # Board handler for PushButton
-    def _pb_board(self, data, matrix,sleepEvent):
+    def _pb_board(self, data, matrix, sleepEvent):
 
         board = getattr(self, data.config.pushbutton_state_triggered1)
-        board(data, matrix,sleepEvent)
+        board(data, matrix, sleepEvent)
 
     # Board handler for Weather Alert
-    def _wx_alert(self, data, matrix,sleepEvent):
+    def _wx_alert(self, data, matrix, sleepEvent):
 
         board = getattr(self, "wxalert")
-        board(data, matrix,sleepEvent)
+        board(data, matrix, sleepEvent)
 
     # Board handler for screensaver
-    def _screensaver(self, data, matrix,sleepEvent):
+    def _screensaver(self, data, matrix, sleepEvent):
 
         board = getattr(self, "screensaver")
-        board(data, matrix,sleepEvent)
+        board(data, matrix, sleepEvent)
 
     # Board handler for Off day state
-    def _off_day(self, data, matrix,sleepEvent):
+    def _off_day(self, data, matrix, sleepEvent):
         bord_index = 0
         while True:
             board = getattr(self, data.config.boards_off_day[bord_index])
@@ -88,7 +103,7 @@ class Boards:
                 else:
                     data.pb_trigger = False
 
-            board(data, matrix,sleepEvent)
+            board(data, matrix, sleepEvent)
 
             if bord_index >= (len(data.config.boards_off_day) - 1):
                 return
@@ -96,7 +111,7 @@ class Boards:
                 if not data.pb_trigger or not data.wx_alert_interrupt or not data.screensaver:
                     bord_index += 1
 
-    def _scheduled(self, data, matrix,sleepEvent):
+    def _scheduled(self, data, matrix, sleepEvent):
         bord_index = 0
         while True:
             board = getattr(self, data.config.boards_scheduled[bord_index])
@@ -130,7 +145,7 @@ class Boards:
                 else:
                     data.pb_trigger = False
 
-            board(data, matrix,sleepEvent)
+            board(data, matrix, sleepEvent)
 
             if bord_index >= (len(data.config.boards_scheduled) - 1):
                 return
@@ -138,7 +153,7 @@ class Boards:
                 if not data.pb_trigger or not data.wx_alert_interrupt or not data.screensaver:
                     bord_index += 1
 
-    def _intermission(self, data, matrix,sleepEvent):
+    def _intermission(self, data, matrix, sleepEvent):
         bord_index = 0
         while True:
             board = getattr(self, data.config.boards_intermission[bord_index])
@@ -172,8 +187,8 @@ class Boards:
             #         bord_index -= 1
             #     else:
             #         data.pb_trigger = False
-
-            board(data, matrix,sleepEvent)
+        
+            board(data, matrix, sleepEvent)
 
             if bord_index >= (len(data.config.boards_intermission) - 1):
                 return
@@ -181,7 +196,7 @@ class Boards:
                 if not data.pb_trigger or not data.wx_alert_interrupt or not data.screensaver:
                     bord_index += 1
 
-    def _post_game(self, data, matrix,sleepEvent):
+    def _post_game(self, data, matrix, sleepEvent):
         bord_index = 0
         while True:
             board = getattr(self, data.config.boards_post_game[bord_index])
@@ -217,7 +232,7 @@ class Boards:
                     data.pb_trigger = False
 
 
-            board(data, matrix,sleepEvent)
+            board(data, matrix, sleepEvent)
 
             if bord_index >= (len(data.config.boards_post_game) - 1):
                 return
@@ -228,75 +243,90 @@ class Boards:
     def fallback(self, data, matrix, sleepEvent):
         Clock(data, matrix, sleepEvent)
 
-    def scoreticker(self, data, matrix,sleepEvent):
+    def scoreticker(self, data, matrix, sleepEvent):
         Scoreticker(data, matrix, sleepEvent).render()
 
-    def seriesticker(self, data, matrix,sleepEvent):
+    def seriesticker(self, data, matrix, sleepEvent):
         '''
             forcing it to show since the playoff start and regular season end are in conflict for 2021
         '''
         Seriesticker(data, matrix, sleepEvent).render()
         '''if data.status.is_playoff(data.today, data.playoffs):
             Seriesticker(data, matrix, sleepEvent).render()
-        '''  
-
-    def stanley_cup_champions(self, data, matrix,sleepEvent):
+        '''    
+    
+    def stanley_cup_champions(self, data, matrix, sleepEvent):
         StanleyCupChampions(data, matrix, sleepEvent).render()
 
-    def standings(self, data, matrix,sleepEvent):
+    def standings(self, data, matrix, sleepEvent):
         #Try making standings a thread
         Standings(data, matrix, sleepEvent).render()
 
-    def team_summary(self, data, matrix,sleepEvent):
+    def team_summary(self, data, matrix, sleepEvent):
         TeamSummary(data, matrix, sleepEvent).render()
 
-    def clock(self, data, matrix,sleepEvent):
+    def clock(self, data, matrix, sleepEvent):
         Clock(data, matrix, sleepEvent)
 
-    def pbdisplay(self, data, matrix,sleepEvent):
+    def pbdisplay(self, data, matrix, sleepEvent):
         pbDisplay(data, matrix, sleepEvent)
 
-    def weather(self, data, matrix,sleepEvent):
+    def weather(self, data, matrix, sleepEvent):
         wxWeather(data, matrix, sleepEvent)
 
-    def wxalert(self, data, matrix,sleepEvent):
+    def wxalert(self, data, matrix, sleepEvent):
         wxAlert(data, matrix, sleepEvent)
 
-    def wxforecast(self, data, matrix,sleepEvent):
+    def wxforecast(self, data, matrix, sleepEvent):
         wxForecast(data, matrix, sleepEvent)
 
-    def screensaver(self, data, matrix,sleepEvent):
+    def screensaver(self, data, matrix, sleepEvent):
         screenSaver(data, matrix, sleepEvent)
 
-    def christmas(self, data, matrix,sleepEvent):
-        Christmas(data, matrix, sleepEvent).draw()
+    def bday0115(self, data, matrix, sleepEvent):
+        Bday0115(data, matrix, sleepEvent).draw()
 
-    def seasoncountdown(self, data, matrix,sleepEvent):
-        SeasonCountdown(data, matrix, sleepEvent).draw()
+    def bday0201(self, data, matrix, sleepEvent):
+        Bday0201(data, matrix, sleepEvent).draw()
 
-    def ovigoals(self, data, matrix,sleepEvent):
+    def bday0306(self, data, matrix, sleepEvent):
+        Bday0306(data, matrix, sleepEvent).draw()
+
+    def bday0330(self, data, matrix, sleepEvent):
+        Bday0330(data, matrix, sleepEvent).draw()
+
+    def bday0403(self, data, matrix, sleepEvent):
+        Bday0403(data, matrix, sleepEvent).draw()
+
+    def bday0503(self, data, matrix, sleepEvent):
+        Bday0503(data, matrix, sleepEvent).draw()
+
+    def bday0727(self, data, matrix, sleepEvent):
+        Bday0727(data, matrix, sleepEvent).draw()
+
+    def bday0803(self, data, matrix, sleepEvent):
+        Bday0803(data, matrix, sleepEvent).draw()
+
+    def bday1001(self, data, matrix, sleepEvent):
+        Bday1001(data, matrix, sleepEvent).draw()
+
+    def bday1112(self, data, matrix, sleepEvent):
+        Bday1112(data, matrix, sleepEvent).draw()
+
+    def ovigoals(self, data, matrix, sleepEvent):
         OviGoals(data, matrix, sleepEvent).draw()
-    
-    def freedom(self, data, matrix,sleepEvent):
+
+    def streamlabs(self, data, matrix, sleepEvent):
+        StreamLabs(data, matrix, sleepEvent).draw()
+
+    def freedom(self, data, matrix, sleepEvent):
         Freedom(data, matrix, sleepEvent).draw()
 
-    def birthday0115(self, data, matrix,sleepEvent):
-        Birthday0115(data, matrix, sleepEvent).draw()
+    def easter(self, data, matrix, sleepEvent):
+        Easter(data, matrix, sleepEvent).draw()
 
-    def birthday0201(self, data, matrix,sleepEvent):
-        Birthday0201(data, matrix, sleepEvent).draw()
-    
-    def birthday0330(self, data, matrix,sleepEvent):
-        Birthday0330(data, matrix, sleepEvent).draw()
+    def christmas(self, data, matrix, sleepEvent):
+        Christmas(data, matrix, sleepEvent).draw()
 
-    def birthday0403(self, data, matrix,sleepEvent):
-        Birthday0403(data, matrix, sleepEvent).draw()
-    
-    def birthday0727(self, data, matrix,sleepEvent):
-        Birthday0727(data, matrix, sleepEvent).draw()
-
-    def birthday1001(self, data, matrix,sleepEvent):
-        Birthday1001(data, matrix, sleepEvent).draw()
-
-    def birthday1112(self, data, matrix,sleepEvent):
-        Birthday1112(data, matrix, sleepEvent).draw()
+    def seasoncountdown(self, data, matrix, sleepEvent):
+        SeasonCountdown(data, matrix, sleepEvent).draw()

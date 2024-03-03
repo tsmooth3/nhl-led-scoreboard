@@ -3,9 +3,10 @@
 """
 from time import sleep
 from utils import center_obj
-from data.scoreboard import Scoreboard
+from data.scoreboard import GameSummaryBoard
 from renderer.scoreboard import ScoreboardRenderer
 from renderer.matrix import MatrixPixels
+import debug
 
 class Scoreticker:
     def __init__(self, data, matrix, sleepEvent):
@@ -27,8 +28,8 @@ class Scoreticker:
                 self.matrix.clear()
                 if self.index >= (len(self.games)):
                     return
-                    
-                ScoreboardRenderer(self.data, self.matrix, Scoreboard(self.games[self.index], self.data)).render()
+
+                ScoreboardRenderer(self.data, self.matrix, GameSummaryBoard(self.games[self.index], self.data)).render()
                 self.show_indicator()
                 self.matrix.render()
 
@@ -44,7 +45,7 @@ class Scoreticker:
                 self.index += 1
 
         except IndexError:
-            print("no game to display, you set preferred teams only or NHL OFF DAY today")
+            debug.info("no game to display, you set preferred teams only or NHL OFF DAY today")
             return
 
     def show_indicator(self):

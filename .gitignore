@@ -157,3 +157,9 @@ src/nhl_api_testing.py
 # board developement and testing folder
 src/renderer/boarddev
 
+# Custom_logos to overwrite the standard one
+config/custom_logos.json
+
+nhl-api-client/
+
+config/streamlabs*
