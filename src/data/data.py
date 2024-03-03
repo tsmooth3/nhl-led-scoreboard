@@ -532,7 +532,7 @@ class Data:
                         self.stanleycup_round = True
 
                     debug.info("defaultround number is : {}".format(self.playoffs.default_round))
-                    8478996
+                    
                     try:
                         self.series = []
 

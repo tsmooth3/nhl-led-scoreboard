@@ -1193,7 +1193,7 @@ def main():
         print(setupVersion,UNDERLINE,BLUE)
         mainVersion="nhl led scoreboard V{}".format(getVersion())
         print(mainVersion,UNDERLINE,GREEN,BOLD)
-        
+
     if not os.path.exists(args.confdir):
         # Get current working directory
         setup_cwd = os.getcwd()

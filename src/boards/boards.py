@@ -9,6 +9,7 @@ from boards.seriesticker import Seriesticker
 from boards.standings import Standings
 from boards.team_summary import TeamSummary
 from boards.clock import Clock
+#from boards.covid_19 import Covid_19
 from boards.pbdisplay import pbDisplay
 from boards.wxWeather import wxWeather
 from boards.wxAlert import wxAlert
@@ -31,6 +32,15 @@ from boards.streamlabs import StreamLabs
 from boards.easter import Easter
 from boards.freedom import Freedom
 from boards.stanley_cup_champions import StanleyCupChampions
+from boards.ovigoals import OviGoals
+from boards.freedom import Freedom
+from boards.birthday0115 import Birthday0115
+from boards.birthday0201 import Birthday0201
+from boards.birthday0330 import Birthday0330
+from boards.birthday0403 import Birthday0403
+from boards.birthday0727 import Birthday0727
+from boards.birthday1001 import Birthday1001
+from boards.birthday1112 import Birthday1112
 from time import sleep
 
 import traceback
