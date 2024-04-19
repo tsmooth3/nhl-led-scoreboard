@@ -15,7 +15,6 @@ class FontsConfig:
     self.fonts = {}
 
     for element, value in self.config.data:
-        print(f"loading {element} {value}")
         self.fonts[element] = ImageFont.truetype(get_file("assets/fonts/{}".format(value['file'])),value['size'])
 
   def get_font(self, id=None):
