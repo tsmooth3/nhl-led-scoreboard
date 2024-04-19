@@ -20,7 +20,7 @@ class Bday0115:
         self.days_old = 0
         self.age = 0
         self.who = "Mom"
-        self.birthday = datetime.date( 1986, 1, 1 )
+        self.birthday = datetime.date( 1986, 1, 15 )
         self.bday_image = Image.open(get_file('assets/images/bday0115.jpg')).resize((64,64))
         self.scroll_pos = self.matrix.width
 
