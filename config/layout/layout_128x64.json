@@ -75,7 +75,7 @@
       "align": "center-top"
     },
     "SOG": {
-      "position": ["50%", 6],
+      "position": ["50%", 13],
       "align": "center-top"
     },
     "irregular_status": {
@@ -90,15 +90,15 @@
   "goal":{
     "scorer_info":{
       "hashtag_dots":{
-        "position": [0, 8],
-        "font": "medium_2",
+        "position": [0, 16],
+        "font": "medium",
         "align": "left"
       }
     }
   },
   "penalty":{
     "team_name":{
-      "position": [1, 9]
+      "position": [1, 18]
     },
     "hashtag_dots":{
       "position": [2, 0],
@@ -118,14 +118,14 @@
     },
 
     "last_name":{
-      "position": [0, 7],
+      "position": [0, 14],
       "relative": {
         "to": "team_name",
         "align": "bottom"
       } 
     },
     "minutes":{
-      "position": [0, 6],
+      "position": [0, 12],
       "font": "medium_2",
       "relative": {
         "to": "last_name",

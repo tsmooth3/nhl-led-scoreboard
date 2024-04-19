@@ -19,6 +19,20 @@
       	"boards_list": {
           	"enum": [
               "wxalert",
+              "freedom",
+              "streamlabs",
+              "easter",
+              "bday0115",
+              "bday0201",
+              "bday0306",
+              "bday0330",
+              "bday0403",
+              "bday0503",
+              "bday0727",
+              "bday0803",
+              "bday1001",
+              "bday1112",
+              "ovigoals",
               "wxforecast",
               "scoreticker",
               "seriesticker",
@@ -28,6 +42,15 @@
               "christmas",
               "seasoncountdown",
               "clock",
+              "ovigoals",
+              "freedom",
+              "birthday0115",
+              "birthday0201",
+              "birthday0330",
+              "birthday0403",
+              "birthday0727",
+              "birthday1001",
+              "birthday1112",
               "weather"
             ]
         }
@@ -1375,7 +1398,7 @@
                             "$id": "#/properties/sbio/properties/pushbutton/properties/state_triggered1",
                             "type": "string",
                             "title": "state_triggered1",
-                            "description": "The board you want displayed on button press. If this is blank falls back to the default board which is clock. Current boards available are scoreticker, standings, clock and weather",
+                            "description": "The board you want displayed on button press. If this is blank falls back to the default board which is clock. Current boards available are scoreticker, standings, clock, and weather",
                             "default": "clock",
                             "examples": [
                                 "weather",

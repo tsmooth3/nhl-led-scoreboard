@@ -64,6 +64,12 @@ def get_overview(game_id):
     except requests.exceptions.RequestException as e:
         raise ValueError(e)
 
+def get_ovi_goals():
+    try:
+        data = requests.get(OVIGOALS_URL.format(BASE_URL), timeout=REQUEST_TIMEOUT)
+        return data
+    except requests.exceptions.RequestException as e:
+        raise ValueError(e)
 
 def get_game_status():
     try:

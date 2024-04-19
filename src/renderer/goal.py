@@ -21,7 +21,7 @@ class GoalRenderer:
         self.assists = goal_details.assists
         self.rotation_rate = 10
         self.matrix = matrix
-        self.font = data.config.layout.font
+        self.font = data.config.layout.font_medium
         self.font_medium = data.config.layout.font_medium
         self.layout = data.config.config.layout.get_board_layout('goal')
         self.sleepEvent = sleepEvent
@@ -47,9 +47,9 @@ class GoalRenderer:
         self.sleepEvent.wait(self.rotation_rate)
 
     def draw_scorer(self):
-        self.matrix.draw.rectangle([0,0,64,6], fill=(self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b']))
+        self.matrix.draw.rectangle([0,0,128,12], fill=(self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b']))
         self.matrix.draw_text(
-                (1, 1), 
+                (2, 2), 
                 "GOAL @ {}/{}".format(self.periodTime, self.period), 
                 font=self.font, 
                 fill=(self.team_txt_color['r'], self.team_txt_color['g'], self.team_txt_color['b'])
@@ -57,82 +57,82 @@ class GoalRenderer:
 
         self.draw_hashtag()
         self.matrix.draw_text(
-                (11, 8), 
+                (22, 16), 
                 str(self.scorer["info"]["sweaterNumber"]),
                 font=self.font_medium, 
                 fill=(255,255,255)
             )
         
         # Drawing the Team Badge
-        text_image = Image.new('RGBA', (13,7), (self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b'],255))
+        text_image = Image.new('RGBA', (26,14), (self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b'],255))
         draw_teambadge = ImageDraw.Draw(text_image)
-        draw_teambadge.text((1,0), self.teamAbbrev, (self.team_txt_color['r'], self.team_txt_color['g'], self.team_txt_color['b'], 255), font=self.font)
+        draw_teambadge.text((2,0), self.teamAbbrev, (self.team_txt_color['r'], self.team_txt_color['g'], self.team_txt_color['b'], 255), font=self.font)
         rotated_text_image = text_image.rotate(90, expand=True)
-        self.matrix.image.paste(rotated_text_image,(0,19))
+        self.matrix.image.paste(rotated_text_image,(0,38))
 
         self.matrix.draw_text(
-                (8, 20), 
+                (16, 40), 
                 self.scorer["info"]["firstName"]["default"].upper(),
                 font=self.font, 
                 fill=(255,255,255)
             )
         self.matrix.draw_text(
-                (8, 26), 
+                (16, 52), 
                 self.scorer["info"]["lastName"]["default"].upper(),
                 font=self.font, 
                 fill=(255,255,255)
             )
 
     def draw_details(self):
-        self.matrix.draw.rectangle([0,0,64,6], fill=(self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b']))
+        self.matrix.draw.rectangle([0,0,128,12], fill=(self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b']))
         self.matrix.draw_text(
-                (1, 1), 
+                (2, 2), 
                 "GOAL @ {}/{}".format(self.periodTime, self.period), 
                 font=self.font, 
                 fill=(self.team_txt_color['r'], self.team_txt_color['g'], self.team_txt_color['b'])
             )
 
         scorer_name_coord = self.matrix.draw_text(
-                (1, 8), 
+                (2, 16), 
                 self.scorer["info"]["lastName"]["default"].upper(), 
                 font=self.font, 
                 fill=(255, 255, 255)
             )
-        scorer_points_x_coord = scorer_name_coord["position"][0] + scorer_name_coord["size"][0] + 3
+        scorer_points_x_coord = scorer_name_coord["position"][0] + scorer_name_coord["size"][0] + 6
         self.matrix.draw_text(
-                (scorer_points_x_coord, 8),
+                (scorer_points_x_coord, 16),
                 "", # This was points in the game, but we don't get it. Should we do something else?
                 font=self.font, 
                 fill=(self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b'])
             )
 
         self.matrix.draw_text(
-                (1, 15), 
+                (2, 30), 
                 "ASSISTS", 
                 font=self.font, 
                 fill=(self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b']),
             )
 
-        assists_y_pos = 21
+        assists_y_pos = 42
         if self.assists:
             for i in range(len(self.assists)):
                 assist_name_coord = self.matrix.draw_text(
-                    (1, assists_y_pos), 
+                    (2, assists_y_pos), 
                     self.assists[i]["info"]["lastName"]["default"].upper(), 
                     font=self.font, 
                     fill=(255, 255, 255)
                 )
-                assists_points_x_coord = assist_name_coord["position"][0] + assist_name_coord["size"][0] + 3
+                assists_points_x_coord = assist_name_coord["position"][0] + assist_name_coord["size"][0] + 6
                 self.matrix.draw_text(
                     (assists_points_x_coord, assists_y_pos), 
                     "", # This was points in the game, but we don't get it. Should we do something else?
                     font=self.font, 
                     fill=(self.team_bg_color['r'], self.team_bg_color['g'], self.team_bg_color['b'])
                 )
-                assists_y_pos += 6
+                assists_y_pos += 12
         else:
             self.matrix.draw_text(
-                    (1, assists_y_pos), 
+                    (2, assists_y_pos), 
                     "UNASSISTED", 
                     font=self.font, 
                     fill=(255, 255, 255)
