@@ -21,23 +21,36 @@ class OviGoals:
         self.scroll_pos = self.matrix.width
 
     def draw(self):
-        
         debug.info("OviGoals board launched")
-
         self.draw_ovi_goals()
   
     def draw_ovi_goals(self) :
-        
         self.matrix.clear()
         ovi_uri = 'https://api-web.nhle.com/v1/player/8471214/landing'
-        #odata = nhl_api.data.get_ovi_goals()
         odata = requests.get(ovi_uri)
         oparsed = odata.json()
-        #goalcount = oparsed["stats"][0]["splits"][0]["stat"]['goals']
         goalcount = oparsed['careerTotals']['regularSeason']['goals']
+        points = oparsed['careerTotals']['regularSeason']['points']
+        try:
+            seasonGoals = oparsed['featuredStats']['regularSeason']['subSeasonss']['goals']
+            seasonGames = oparsed['featuredStats']['regularSeason']['subSeasonss']['gamesPlayed']
+        except:
+            seasonGames = 0
+            seasonGoals = 0
+        goalpct = 0
+        if seasonGames > 0:
+            goalpct = seasonGoals / seasonGames
+        expectedGoals = round(82 * goalpct, 1)
+
         #for testing
         #goalcount = 908
-        debug.info(str(goalcount) + " Ovi Goals")
+        debug.info(f"Ovi Goals    : {goalcount}")
+        debug.info(f"Ovi Points   : {points}")
+        debug.info(f"season Goals : {seasonGoals}")
+        debug.info(f"season Games : {seasonGames}")
+        debug.info(f"goalpct      : {goalpct}")
+        debug.info(f"expected Goals 82 Games : {expectedGoals}")
+
         jagr = 767
         howe = 802
         gretzky = 895
@@ -61,41 +74,27 @@ class OviGoals:
             countdowntext = "BEST )))" 
             countdowntext2 = "+" + str(goalsTo1st * -1 + 1)
 
-        if self.matrix.width == 128:
+        if self.matrix.width >= 128:
             debug.info("Drawing 128x64 Ovi")
             ovi_image = Image.open(get_file('assets/images/128ovi_goals.png'))
             self.matrix.draw_image((0,0), ovi_image)
         
             #draw top text        
-            self.matrix.draw_text(
-                (56,2), 
-                "OVI GOALS", 
-                font=self.font.medium,
-                fill=(255,255,255)
-            )
+            self.matrix.draw_text( (50,2), "OVI GOALS", font=self.font.medium, fill=(255,255,255) )
 
 	    #draw ovi goal count
-            self.matrix.draw_text(
-                (68,18),
-                str(goalcount),
-                font=self.font.large,
-                fill=(255,0,0)
-            )
+            self.matrix.draw_text( (52,18), str(goalcount), font=self.font.large, fill=(255,0,0) )
+            if expectedGoals > 0:
+                self.matrix.draw_text( (90,15), f"({seasonGoals})", font=self.font.medium, fill=(0,233,233) )
+                self.matrix.draw_text( (90,27), f"*{expectedGoals}", font=self.font.medium, fill=(0,233,233) )
+            else:
+                self.matrix.draw_text( (90,23), f"{points}", font=self.font.medium, fill=(0,233,233) )
+
         
             #draw bottom text        
-            self.matrix.draw_text(
-                (66,38), 
-                str(countdowntext), 
-                font=self.font.medium,
-                fill=(255,255,0)
-            )
-            #draw bottom text        
-            self.matrix.draw_text(
-                (66,50), 
-                str(countdowntext2), 
-                font=self.font.medium,
-                fill=(255,255,0)
-            )
+            self.matrix.draw_text( (66,40), str(countdowntext), font=self.font.medium, fill=(255,255,0) )
+            self.matrix.draw_text( (66,51), str(countdowntext2), font=self.font.medium, fill=(255,255,0) )
+            
             # self.matrix.image.save('/home/pi/pbjelly/ovi.png')
         else: 
             debug.info("Drawing 64x32 Ovi")
