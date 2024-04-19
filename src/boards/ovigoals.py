@@ -32,8 +32,8 @@ class OviGoals:
         goalcount = oparsed['careerTotals']['regularSeason']['goals']
         points = oparsed['careerTotals']['regularSeason']['points']
         try:
-            seasonGoals = oparsed['featuredStats']['regularSeason']['subSeasonss']['goals']
-            seasonGames = oparsed['featuredStats']['regularSeason']['subSeasonss']['gamesPlayed']
+            seasonGoals = oparsed['featuredStats']['regularSeason']['subSeason']['goals']
+            seasonGames = oparsed['featuredStats']['regularSeason']['subSeason']['gamesPlayed']
         except:
             seasonGames = 0
             seasonGoals = 0
@@ -75,7 +75,7 @@ class OviGoals:
             countdowntext2 = "+" + str(goalsTo1st * -1 + 1)
 
         if self.matrix.width >= 128:
-            debug.info("Drawing 128x64 Ovi")
+            debug.info(f"Drawing 128x64 Ovi: {self.data.config.ovigoals_alt}")
             ovi_image = Image.open(get_file('assets/images/128ovi_goals.png'))
             self.matrix.draw_image((0,0), ovi_image)
         
@@ -84,9 +84,18 @@ class OviGoals:
 
 	    #draw ovi goal count
             self.matrix.draw_text( (52,18), str(goalcount), font=self.font.large, fill=(255,0,0) )
+	    #draw ovi season goals or points
             if expectedGoals > 0:
-                self.matrix.draw_text( (90,15), f"({seasonGoals})", font=self.font.medium, fill=(0,233,233) )
-                self.matrix.draw_text( (90,27), f"*{expectedGoals}", font=self.font.medium, fill=(0,233,233) )
+                if self.data.config.ovigoals_alt:
+                    self.matrix.draw_text( (90,15), f"({seasonGoals})", font=self.font.medium, fill=(0,233,233) )
+                    self.matrix.draw_text( (90,27), f"*{expectedGoals}", font=self.font.medium, fill=(0,233,233) )
+                    self.data.config.ovigoals_alt = False
+                    debug.info(f"Setting data.config.ovigoals_alt: {self.data.config.ovigoals_alt}")
+                else:
+                    self.matrix.draw_text( (90,15), "pts:", font=self.font.medium, fill=(0,233,233) )
+                    self.matrix.draw_text( (90,27), f"{points}", font=self.font.medium, fill=(0,233,233) )
+                    self.data.config.ovigoals_alt = True
+                    debug.info(f"Setting data.config.ovigoals_alt: {self.data.config.ovigoals_alt}")
             else:
                 self.matrix.draw_text( (90,23), f"{points}", font=self.font.medium, fill=(0,233,233) )
 

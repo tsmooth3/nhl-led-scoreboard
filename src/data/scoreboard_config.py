@@ -15,6 +15,7 @@ class ScoreboardConfig:
         self.testing_mode = False
         self.test_goal_animation = False
         self.testScChampions = False
+        self.ovigoals_alt = False
 
         # Misc config options
         self.debug = json["debug"]
