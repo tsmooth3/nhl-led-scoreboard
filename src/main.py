@@ -66,6 +66,9 @@ def run():
     # It initializes all sorts of things like current season, teams, helper functions
     print("init Data")
     data = Data(config)
+    print(f"config: {data.config.live_mode}") 
+    print(f"config: {data.config.testing_mode}") 
+    print(f"config: {data.pref_teams}") 
 
     #If we pass the logging arguments on command line, override what's in the config.json, else use what's in config.json (color will always be false in config.json)
     if commandArgs.logcolor and commandArgs.loglevel != None:

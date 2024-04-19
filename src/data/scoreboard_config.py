@@ -20,6 +20,8 @@ class ScoreboardConfig:
         self.debug = json["debug"]
         self.loglevel = json["loglevel"]
         self.live_mode = json["live_mode"]
+        self.testing_mode = json["testing_mode"]
+        self.test_goal_animation = json["test_goal_animation"]
 
         # Preferences
         self.end_of_day = json["preferences"]["end_of_day"]

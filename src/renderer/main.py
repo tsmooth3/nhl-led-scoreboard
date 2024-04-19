@@ -48,7 +48,7 @@ class MainRenderer:
         if self.data.config.test_goal_animation:
             debug.info("Rendering in Testing Mode")
             while True:
-                self._draw_event_animation("goal",id=9)
+                self._draw_event_animation("goal",id=1)
 
         while self.data.network_issues:
             Clock(self.data, self.matrix, self.sleepEvent, duration=60)
@@ -396,7 +396,7 @@ class MainRenderer:
                 frame_nub = 0
                 im.seek(frame_nub)
 
-            self.matrix.draw_image(("50%", 0), im, "center")
+            self.matrix.draw_image(("50%", 0), im.resize((128,64)), "center")
             self.matrix.render()
 
             frame_nub += 1

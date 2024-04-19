@@ -50,7 +50,7 @@ class StreamLabs:
         day = (55,117,176)
         evening = (99,177,213) 
         maxColor = (242,33,222)
-        avgColor = (228,228,228)
+        avgColor = (228,228,0)
        
         now = datetime.today()
         startDate = now - timedelta(days=2,hours=now.hour,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
@@ -77,13 +77,13 @@ class StreamLabs:
             res = requests.get(hourlyUsageUri, headers=headers)
             results += res.json()['readings']
 
-        with open('config/softener.json', 'r') as openfile:
-            softenerObj = json.load(openfile)
-        sinceReset2 = url + "/v1/locations/" + locationId + "/readings/water-usage?groupBy=day&startTime=" + softenerObj['resetDate']
-        res2 = requests.get(sinceReset2, headers=headers)
-        usage2 = sum(map(lambda x: float(x['volume']), res2.json()['readings']))
-        print(f"{softenerObj['capacity']} - {usage2}")
-        sRemaining = int(softenerObj['capacity'] - (usage2*.72))
+        # with open('config/softener.json', 'r') as openfile:
+        #    softenerObj = json.load(openfile)
+        #sinceReset2 = url + "/v1/locations/" + locationId + "/readings/water-usage?groupBy=day&startTime=" + softenerObj['resetDate']
+        #res2 = requests.get(sinceReset2, headers=headers)
+        #usage2 = sum(map(lambda x: float(x['volume']), res2.json()['readings']))
+        #print(f"{softenerObj['capacity']} - {usage2}")
+        #sRemaining = int(softenerObj['capacity'] - (usage2*.72))
         
         self.matrix.draw_rectangle((0,0),(128,64),(32,55,65))
         self.matrix.draw_image((0,-1), streamlabs_image)
@@ -147,18 +147,20 @@ class StreamLabs:
         # draw the stuff
         nowVol = math.ceil(thirtydayresults[-1]['volume'])
         self.matrix.draw_rectangle((16+avgBar+2,28),(1,36), avgColor)
-        self.matrix.draw_text((16+avgBar-20,28), "avg "+str(round(avgGal)),font=font1,fill=avgColor)
+        #self.matrix.draw_text((16+avgBar-20,28), "avg "+str(round(avgGal)),font=font1,fill=avgColor)
         self.matrix.draw_rectangle((16+maxBar+2,28),(1,36), maxColor)
-        self.matrix.draw_text((32,1),  "Now".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
-        self.matrix.draw_text((59,1),  str(nowVol).ljust(4),font=font1,fill=(242,242,242))
-        self.matrix.draw_text((32,15), "Max".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
-        self.matrix.draw_text((59,15), str(maxGal).ljust(4),font=font1,fill=(242,33,222))
-        self.matrix.draw_text((83,1), "Softnr:",font=font1,fill=(242,242,242))
-        if sRemaining < 100:
-            self.matrix.draw_text((95,15),  str(sRemaining).ljust(4),font=font1,fill=(255,255,0))
-        else:
-            self.matrix.draw_text((95,15),  str(sRemaining).ljust(4),font=font1,fill=(242,242,242))
-        debug.info("s* " + str(sRemaining))
+        self.matrix.draw_text((30,1),  "Now".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((57,1),  str(nowVol).ljust(4),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((30,15), "Max".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((57,15), str(maxGal).ljust(4),font=font1,fill=(242,33,222))
+        self.matrix.draw_text((81,1), "Avg:",font=font1,fill=(242,242,242))
+        self.matrix.draw_text((106,1),  str(round(avgGal)).ljust(3),font=font1,fill=(255,255,0))
+        #self.matrix.draw_text((83,1), "Softnr:",font=font1,fill=(242,242,242))
+        #if sRemaining < 100:
+        #    self.matrix.draw_text((95,15),  str(sRemaining).ljust(4),font=font1,fill=(255,255,0))
+        #else:
+        #    self.matrix.draw_text((95,15),  str(sRemaining).ljust(4),font=font1,fill=(242,242,242))
+        #debug.info("s* " + str(sRemaining))
         #self.matrix.image.save("/home/pi/pbjelly/streamlabs.png") 
         self.matrix.render()
         self.sleepEvent.wait(30)
