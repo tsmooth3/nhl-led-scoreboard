@@ -25,7 +25,7 @@ class Bday0803:
         self.scroll_pos = self.matrix.width
 
     def draw(self):
-        debug.info(f"{self.who} {self.birthday} Birthday countdown board launched")
+        debug.info(f"{self.who} {self.birthday} Birthday memorial")
         self.calc_days_to_birthday()
         #for testing purposes
         #self.days_to_birthday = 0

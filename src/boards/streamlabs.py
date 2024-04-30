@@ -45,12 +45,13 @@ class StreamLabs:
         results = []
         bars = []
         barMax = 96+16
-        chartMax = 285
+        chartMax = 260
         morn = (168,246,252)
         day = (55,117,176)
         evening = (99,177,213) 
         maxColor = (242,33,222)
         avgColor = (228,228,0)
+        avgyColor = (245,135,0)
        
         now = datetime.today()
         startDate = now - timedelta(days=2,hours=now.hour,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
@@ -63,13 +64,16 @@ class StreamLabs:
             "Authorization" : f"Bearer {self.SL_TOKEN}"
         }
        
-        res = requests.get(url + "/v1/locations", headers=headers)
-        locationId = res.json()['locations'][0]['locationId']
+        locationId = requests.get(url + "/v1/locations", headers=headers).json()['locations'][0]['locationId']
         hourlyUsageUri = url + "/v1/locations/" + locationId + f"/readings/water-usage?page={page}&groupBy=hour&startTime=" + startDate.astimezone().isoformat()
-        thirtydayUsageUri = url + "/v1/locations/" + locationId + f"/readings/water-usage?page={page}&groupBy=day&startTime=" + thirtyStartDate.astimezone().isoformat()
         res = requests.get(hourlyUsageUri, headers=headers)
-        thirtydayres = requests.get(thirtydayUsageUri, headers=headers)
-        thirtydayresults = thirtydayres.json()['readings']
+        
+        thirtydayUsageUri = url + "/v1/locations/" + locationId + f"/readings/water-usage?page={page}&groupBy=day&startTime=" + thirtyStartDate.astimezone().isoformat()
+        thirtydayresults = requests.get(thirtydayUsageUri, headers=headers).json()['readings']
+        
+        summaryUri = url + "/v1/locations/" + locationId + "/readings/water-usage/summary"
+        summary = requests.get(summaryUri, headers=headers).json()
+
         results += res.json()['readings']
         while(page < res.json()['pageCount']):
             page += 1
@@ -112,16 +116,19 @@ class StreamLabs:
             rVols[index]['vol']=segmentVol
             rVols[index]['dayTotal']=dayTotal
     
-        avgGal = mean(list(map(lambda x: (x['volume']), thirtydayresults)))
+        # avgGal = mean(list(map(lambda x: (x['volume']), thirtydayresults)))
+        avgGaly = summary['thisYear'] / 365 
+        avgGal = summary['thisMonth'] / int(datetime.now().day) 
         avgBar = round((avgGal/chartMax)*barMax)
+        avgyBar = round((avgGaly/chartMax)*barMax)
         maxGal = max(list(map(lambda x: (math.ceil(x['volume'])), thirtydayresults)))
         maxBar = round((maxGal/chartMax)*barMax)
-        print(f"average: {avgGal} - maxGal: {maxGal} - chartMax: {chartMax}")
+        #print(f"average: {avgGal} - maxGal: {maxGal} - chartMax: {chartMax}")
+        debug.info(f"average: {round(avgGal,2)} - yearAverage: {round(avgGaly,2)} - maxGal: {maxGal} - chartMax: {chartMax}")
 
         for v in rVols:
             bars.append(round((v['vol']/chartMax)*barMax))
 
-        self.matrix.draw_rectangle((16+avgBar+2,28),(1,36), (242,242,0))
         self.matrix.draw_rectangle((16+maxBar+2,28),(1,36), (242,33,222))
         for i in range(0, len(bars), 3):
             try:
@@ -145,23 +152,24 @@ class StreamLabs:
             self.matrix.draw_rectangle((16+x1+x2+2,30+(i*4)),(x3,8),evening)
  
         # draw the stuff
-        nowVol = math.ceil(thirtydayresults[-1]['volume'])
-        self.matrix.draw_rectangle((16+avgBar+2,28),(1,36), avgColor)
-        #self.matrix.draw_text((16+avgBar-20,28), "avg "+str(round(avgGal)),font=font1,fill=avgColor)
+        # nowVol = math.ceil(thirtydayresults[-1]['volume'])
+        nowVol = math.ceil(summary['today'])
+        self.matrix.draw_text((27,1),  "Now".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((54,1),  str(nowVol).ljust(4),font=font1,fill=(242,242,242))
+        
+        #max 
         self.matrix.draw_rectangle((16+maxBar+2,28),(1,36), maxColor)
-        self.matrix.draw_text((30,1),  "Now".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
-        self.matrix.draw_text((57,1),  str(nowVol).ljust(4),font=font1,fill=(242,242,242))
-        self.matrix.draw_text((30,15), "Max".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
-        self.matrix.draw_text((57,15), str(maxGal).ljust(4),font=font1,fill=(242,33,222))
-        self.matrix.draw_text((81,1), "Avg:",font=font1,fill=(242,242,242))
-        self.matrix.draw_text((106,1),  str(round(avgGal)).ljust(3),font=font1,fill=(255,255,0))
-        #self.matrix.draw_text((83,1), "Softnr:",font=font1,fill=(242,242,242))
-        #if sRemaining < 100:
-        #    self.matrix.draw_text((95,15),  str(sRemaining).ljust(4),font=font1,fill=(255,255,0))
-        #else:
-        #    self.matrix.draw_text((95,15),  str(sRemaining).ljust(4),font=font1,fill=(242,242,242))
-        #debug.info("s* " + str(sRemaining))
-        #self.matrix.image.save("/home/pi/pbjelly/streamlabs.png") 
+        self.matrix.draw_text((27,15), "Max".ljust(3) + ":".ljust(2),font=font1,fill=(242,242,242))
+        self.matrix.draw_text((54,15), str(maxGal).ljust(4),font=font1,fill=(242,33,222))
+       
+        #avg 
+        self.matrix.draw_rectangle((16+avgBar+2,28),(0,36), avgColor)
+        self.matrix.draw_rectangle((16+avgyBar+2,28),(0,36), avgyColor)
+        self.matrix.draw_text((76,1), "A.30:",font=font1,fill=(242,242,242))
+        self.matrix.draw_text((104,1), str(round(avgGal)).ljust(3),font=font1,fill=avgColor)
+        self.matrix.draw_text((76,15), "A.YR:",font=font1,fill=(242,242,242))
+        self.matrix.draw_text((104,15),  str(round(avgGaly)).ljust(4),font=font1,fill=avgyColor)
+        
         self.matrix.render()
         self.sleepEvent.wait(30)
 
