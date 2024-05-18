@@ -68,7 +68,7 @@ def run():
     data = Data(config)
     print(f"config: {data.config.live_mode}") 
     print(f"config: {data.config.testing_mode}") 
-    print(f"config: {data.pref_teams}") 
+    #print(f"config: {data.pref_teams}") 
 
     #If we pass the logging arguments on command line, override what's in the config.json, else use what's in config.json (color will always be false in config.json)
     if commandArgs.logcolor and commandArgs.loglevel != None:

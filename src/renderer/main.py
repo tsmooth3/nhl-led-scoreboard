@@ -22,7 +22,7 @@ class MainRenderer:
     def __init__(self, matrix, data, sleepEvent):
         self.matrix = matrix
         self.data = data
-        self.status = self.data.status
+        #self.status = self.data.status
         self.refresh_rate = self.data.config.live_game_refresh_rate
         self.boards = Boards()
         self.sleepEvent = sleepEvent
@@ -31,6 +31,11 @@ class MainRenderer:
 
     def render(self):
 
+        if True:
+            while True:
+                debug.info("It's offseason")
+                self.__render_offday()
+                
         if self.data.config.testing_mode:
             debug.info("Rendering in Testing Mode")
             while True:

@@ -165,7 +165,7 @@ class StreamLabs:
         #avg 
         self.matrix.draw_rectangle((16+avgBar+2,28),(0,36), avgColor)
         self.matrix.draw_rectangle((16+avgyBar+2,28),(0,36), avgyColor)
-        self.matrix.draw_text((76,1), "A.30:",font=font1,fill=(242,242,242))
+        self.matrix.draw_text((76,1), f"{now.strftime('%b')}:",font=font1,fill=(242,242,242))
         self.matrix.draw_text((104,1), str(round(avgGal)).ljust(3),font=font1,fill=avgColor)
         self.matrix.draw_text((76,15), "A.YR:",font=font1,fill=(242,242,242))
         self.matrix.draw_text((104,15),  str(round(avgGaly)).ljust(4),font=font1,fill=avgyColor)
