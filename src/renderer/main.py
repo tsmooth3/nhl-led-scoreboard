@@ -97,7 +97,7 @@ class MainRenderer:
 
             if i >= 1:
                 debug.info("off day data refresh")
-                self.data.refresh_data()
+                #self.data.refresh_data()
                 i = 0
             else:
                 i += 1

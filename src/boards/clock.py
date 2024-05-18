@@ -34,8 +34,10 @@ class Clock:
         if True:
             #self.clockfill = (255,self.clock_color['g'],self.clock_color['b'])
             self.clockfill = (0,100,200)
+            self.clockfill = (100,60,30)
             #self.wxdtfill = (self.wxdt_color['r'],self.wxdt_color['g'],self.wxdt_color['b'])
             self.wxdtfill = (255,0,0)
+            self.wxdtfill = (230,200,150)
         elif len(self.data.config.clock_clock_rgb) > 0 or len(self.data.config.clock_date_rgb) > 0:
             if len(self.data.config.clock_clock_rgb) > 0:
                 #Test string to make sure it's in rgb format
