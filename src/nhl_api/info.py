@@ -27,14 +27,21 @@ def team_info():
     teams_data = {}
     teams_response = {}
     #with client as client:
-    teams_responses = client.standings.get_standings(str(datetime.date.today()))
+    teams_responses = client.standings.get_standings()
     for team in teams_responses["standings"]:
         raw_team_id = team_dict[team["teamAbbrev"]["default"]]
         team_details = TeamDetails(raw_team_id, team["teamName"]["default"], team["teamAbbrev"]["default"])
         team_info = TeamInfo(team, team_details)
         teams_data[raw_team_id] = team_info
 
-    return teams_data
+    if "59" in teams_data:
+        return teams_data
+    else:
+
+        team_details = TeamDetails("59", "Utah Hockey Club", "UTA")
+        team_info = TeamInfo(team, team_details)
+        teams_data[59] = team_info
+        return teams_data
     # TODO: I think most of this is now held in the TeamStandings object, but leaving here for reference
     # for team in teams_data:
     #     try:
@@ -183,15 +190,16 @@ def next_season():
 
 
 def playoff_info(season):
-    data = nhl_api.data.get_playoff_data(season)
-    parsed = data.json()
-    season = parsed["season"]
+    client = NHLClient(verbose = False)
+    data = client.playoffs.carousel(season)
+    parsed = data
+    season = parsed["seasonId"]
     output = {'season': season}
     try:
         playoff_rounds = parsed["rounds"]
         rounds = {}
         for r in range(len(playoff_rounds)):
-            rounds[str(playoff_rounds[r]["number"])] = MultiLevelObject(playoff_rounds[r])
+            rounds[str(playoff_rounds[r]["roundNumber"])] = playoff_rounds[r]
         
         output['rounds'] = rounds
     except KeyError:
@@ -199,17 +207,17 @@ def playoff_info(season):
         output['rounds'] = False
 
     try:
-        default_round = parsed["defaultRound"]
-        output['default_round'] = default_round
+        currentRound = parsed["currentRound"]
+        output['currentRound'] = currentRound
     except KeyError:
         debug.error("No default round for {} Playoff.".format(season))
         default_round = 1
-        output['default_round'] = default_round
+        output['currentRound'] = currentRound
 
     return output
 
 def series_record(seriesCode, season):
-    data = data = nhl_api.data.get_series_record(seriesCode, season)
+    data = nhl_api.data.get_series_record(seriesCode, season)
     parsed = data.json()
     return parsed["data"]
 
@@ -352,7 +360,7 @@ class Wildcard:
 class Playoff():
     def __init__(self, data):
         self.season = data['season']
-        self.default_round = data['default_round']
+        self.default_round = data['currentRound']
         self.rounds = data['rounds']
 
     def __str__(self):

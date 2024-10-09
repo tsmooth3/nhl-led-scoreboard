@@ -147,11 +147,11 @@ class Data:
 
         # Get the teams info
         print("update Teams info")
-        #self.teams_info = self.get_teams()
+        self.teams_info = self.get_teams()
         # So oddly enough, there are a handful of situations where the API does not include the team_id
         # it's happening often enough that it's worth keeping a second teams_info that is keyed off of the
         # abbreviation instead of the the id
-        #self.teams_info_by_abbrev = self.get_teams_by_code()
+        self.teams_info_by_abbrev = self.get_teams_by_code()
 
         # Save the parsed config
         self.config = config
@@ -159,20 +159,20 @@ class Data:
 
         # Get the status from the API
         print("Get status from api")
-        #self.get_status()
+        self.get_status()
 
         # Get favorite team's id
-        #self.pref_teams = self.get_pref_teams_id()
+        self.pref_teams = self.get_pref_teams_id()
 
         # Parse today's date and see if we should use today or yesterday
         self.refresh_current_date()
 
         # Set the pointer to the first game in the list of Pref Games
-        #self.current_game_index = 0
+        self.current_game_index = 0
 
         # Fetch the games for today
         print("refresh games")
-        #self.refresh_games()
+        self.refresh_games()
 
         # Flag to indicate if all preferred games are Final
         self.all_pref_games_final = False
@@ -182,7 +182,7 @@ class Data:
 
         # Get refresh standings
         print("refresh standings")
-        #self.refresh_standings()
+        self.refresh_standings()
 
         # Playoff Flag
         self.isPlayoff = False
@@ -225,7 +225,7 @@ class Data:
             debug.info('It is a new day, refreshing Data')
 
             # Set the pointer to the first game in the list of Pref Games
-            #self.current_game_index = 0
+            self.current_game_index = 0
 
             # Today's date
             self.today = self.date()
