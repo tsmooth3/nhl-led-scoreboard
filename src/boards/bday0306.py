@@ -55,6 +55,8 @@ class Bday0306:
         #calculate days to bday
         self.days_to_birthday = (thebday - today).days
         self.days_old = (today - this_year_bday).days
+        if self.days_to_birthday > 363:
+            self.age = self.age - 1
     
     def birthday_today(self) :
         #  it's Party Time!
