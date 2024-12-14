@@ -17,6 +17,7 @@ class NewYears:
         self.font.scroll = data.config.layout.font_xmas
         self.font.medium = data.config.layout.font_medium
         self.almost_there = False
+        self.new_year = 0
         self.days_to_ny = 0
         self.hours_to_ny = 0
         self.minutes_to_ny = 0
@@ -31,13 +32,13 @@ class NewYears:
 
         debug.info(str(self.days_to_ny) + " days to new years")
 
-        if self.days_to_ny == -1:
+        if self.days_to_ny == 364:
             #today is new years day
             self.ny_today()
 
         else:
             #today is not new years
-            if self.days_to_ny <= 20: 
+            if self.days_to_ny <= 33: 
                 self.ny_countdown()
   
     def update_countdown(self):
@@ -47,58 +48,56 @@ class NewYears:
         
         # for testing
         now = datetime.datetime.now()
-        td = datetime.timedelta(days=15, hours=2, minutes=17)
+        td = datetime.timedelta(days=17, hours=6, minutes=39)
         #today = now + td
         
-        #find the next christmas
-        if today.month == 1 and today.day > 1:
-            xmas_year = today.year + 1
-        else:
-            xmas_year = today.year
+        #find the next new years year
+        new_year = today.year + 1
 
-        xmas = datetime.datetime(xmas_year,12,25)
+        ny = datetime.datetime(new_year,1,1)
         
-        #calculate days to xmas
-        time_to_xmas = xmas - today
-        self.days_to_xmas = time_to_xmas.days
-        self.hours_to_xmas = time_to_xmas.seconds // 3600
-        self.minutes_to_xmas = (time_to_xmas.seconds % 3600) // 60
-        self.seconds_to_xmas = time_to_xmas.seconds % 60
-        if time_to_xmas.total_seconds() < 180:
+        #calculate days to new years
+        time_to_ny = ny - today
+        self.new_year = new_year
+        self.days_to_ny = time_to_ny.days
+        self.hours_to_ny = time_to_ny.seconds // 3600
+        self.minutes_to_ny = (time_to_ny.seconds % 3600) // 60
+        self.seconds_to_ny = time_to_ny.seconds % 60
+        if time_to_ny.total_seconds() < 600:
             self.almost_there = True
         else:
             self.almost_there = False
 
-        debug.info(f"Christmas Countdown: {self.almost_there} : {self.days_to_xmas:02}d {self.hours_to_xmas:02}h {self.minutes_to_xmas:02}m {self.seconds_to_xmas:02}s")
+        debug.info(f"New Years Countdown: {self.almost_there} : {self.days_to_ny:02}d {self.hours_to_ny:02}h {self.minutes_to_ny:02}m {self.seconds_to_ny:02}s")
     
-    def xmas_today(self) :
-        #  it's Christmas!
+    def ny_today(self) :
+        #  it's New Years!
 
-        duration = 15
+        duration = 45
         i = 0
         scroll_rate = .01
             
-        debug.info("It's Christmas!")
+        debug.info("Happy New Year!")
 
         while not self.sleepEvent.is_set():
 
             self.matrix.clear()
 
-            xmas_scroll_text = self.matrix.draw_text(
+            ny_scroll_text = self.matrix.draw_text(
                 (self.scroll_pos,12),
-                "MERRY CHRISTMAS!",
+                f"{self.new_year - 1} HAPPY NEW YEAR! {self.new_year - 1}  ",
                 font=self.font.scroll,
-                fill=(0,255,0)
+                fill=(255,255,200)
                 )
             
-            xmas_scroll_text_width = xmas_scroll_text["size"][0] + 3
+            ny_scroll_text_width = ny_scroll_text["size"][0] + 3
             
-            xmas_image = Image.open(get_file('assets/images/sleigh.png'))
-            self.matrix.draw_image((self.scroll_pos + xmas_scroll_text_width,4), xmas_image)
+            ny_image = Image.open(get_file('assets/images/nye-ball.jpg')).resize((48,48))
+            self.matrix.draw_image((self.scroll_pos + ny_scroll_text_width,4), ny_image)
 
-            xmas_content_width = xmas_scroll_text_width + 48
+            ny_content_width = ny_scroll_text_width + 48
 
-            if(self.scroll_pos < (0 - xmas_content_width) ): self.scroll_pos = self.matrix.width
+            if(self.scroll_pos < (0 - ny_content_width) ): self.scroll_pos = self.matrix.width
 
             i += scroll_rate
             self.scroll_pos -= 1
@@ -109,9 +108,9 @@ class NewYears:
 
             if(i > duration) : break
 
-    def xmas_countdown(self) :
+    def ny_countdown(self) :
         
-        debug.info("Christmas Counter Downer")
+        debug.info("New Years Counter Downer")
         loopTime = 10
         if self.almost_there: 
             loopTime = 180
@@ -120,42 +119,44 @@ class NewYears:
             self.update_countdown()
             
             self.matrix.clear()
-            if self.days_to_xmas == -1:
+            if self.days_to_ny == 364:
                 self.almost_there = False
-                self.xmas_today()
+                self.ny_today()
                 break
 
-            #draw countdown to xmas
+            #draw countdown to new years
             self.matrix.draw_text(
                 (10,10),
-                f"{self.days_to_xmas} days",
+                f"{self.days_to_ny} days",
                 font=self.font.medium,
-                fill=(0,255,0)
+                fill=(200,255,200)
             )
             self.matrix.draw_text(
-                (10,25),
-                f"{self.hours_to_xmas:02}:{self.minutes_to_xmas:02}:{self.seconds_to_xmas:02}",
+                (10,23),
+                f"{self.hours_to_ny:02}:{self.minutes_to_ny:02}:{self.seconds_to_ny:02}",
                 font=self.font.medium,
-                fill=(0,255,0)
+                fill=(200,255,200)
             )
         
-            #choose one of three daily images to draw based on days to xmas and draw it
-            if self.days_to_xmas % 3 == 0:
-                xmas_image = Image.open(get_file('assets/images/xmas_tree.png')).resize((48,48))
-            elif self.days_to_xmas % 3 == 2:
-                xmas_image = Image.open(get_file('assets/images/candy_cane.png')).resize((48,48))
-            else:
-                xmas_image = Image.open(get_file('assets/images/gbread.png')).resize((48,48))
+            #choose one of three daily images to draw based on days to new years and draw it
+            ny_image = Image.open(get_file('assets/images/nye-ball.jpg')).resize((48,48))
 
-            self.matrix.draw_image((75,2), xmas_image)
+            self.matrix.draw_image((75,2), ny_image)
            
             # bottom text
-            self.matrix.draw_text(
-                (15,52), 
-                "'TIL CHRISTMAS", 
-                font=self.font.medium,
-                fill=(255,0,0)
-             )
+            #self.matrix.draw_text(
+            #    (10,42), 
+            #    "COUNTDOWN", 
+            #    font=self.font.medium,
+            #    fill=(255,255,100)
+            #)
 
+            self.matrix.draw_text(
+                (15,45), 
+                f"'TIL {self.new_year}", 
+                font=self.font.medium,
+                fill=(255,255,100)
+            )
+            
             self.matrix.render()
             sleep(1)

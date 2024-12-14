@@ -14,6 +14,7 @@ from boards.pbdisplay import pbDisplay
 from boards.wxWeather import wxWeather
 from boards.wxAlert import wxAlert
 from boards.christmas import Christmas
+from boards.newyears import NewYears
 from boards.seasoncountdown import SeasonCountdown
 from boards.wxForecast import wxForecast
 from boards.screensaver import screenSaver
@@ -335,6 +336,9 @@ class Boards:
 
     def christmas(self, data, matrix, sleepEvent):
         Christmas(data, matrix, sleepEvent).draw()
+
+    def newyears(self, data, matrix, sleepEvent):
+        NewYears(data, matrix, sleepEvent).draw()
 
     def seasoncountdown(self, data, matrix, sleepEvent):
         SeasonCountdown(data, matrix, sleepEvent).draw()
