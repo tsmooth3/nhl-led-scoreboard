@@ -27,8 +27,13 @@ class OviGoals:
     def draw_ovi_goals(self) :
         self.matrix.clear()
         ovi_uri = 'https://api-web.nhle.com/v1/player/8471214/landing'
+        team_uri = 'https://api-web.nhle.com/v1/club-schedule-season/WSH/now'
         odata = requests.get(ovi_uri)
+        tdata = requests.get(team_uri)
         oparsed = odata.json()
+        tparsed = tdata.json()
+        seasongames = tparsed.get('games', [])
+        teamGamesLeft = sum(1 for game in seasongames if game['gameType'] == 2 and game['gameState'] != 'OFF')
         goalcount = oparsed['careerTotals']['regularSeason']['goals']
         points = oparsed['careerTotals']['regularSeason']['points']
         try:
@@ -37,10 +42,11 @@ class OviGoals:
         except:
             seasonGames = 0
             seasonGoals = 0
+        oviGames = teamGamesLeft + seasonGames
         goalpct = 0
         if seasonGames > 0:
             goalpct = seasonGoals / seasonGames
-        expectedGoals = round(82 * goalpct, 1)
+        expectedGoals = round(oviGames * goalpct, 1)
 
         #for testing
         #goalcount = 908
@@ -83,17 +89,17 @@ class OviGoals:
             self.matrix.draw_text( (50,2), "OVI GOALS", font=self.font.medium, fill=(255,255,255) )
 
 	    #draw ovi goal count
-            self.matrix.draw_text( (52,18), str(goalcount), font=self.font.large, fill=(255,0,0) )
+            self.matrix.draw_text( (46,18), str(goalcount), font=self.font.large, fill=(255,0,0) )
 	    #draw ovi season goals or points
             if expectedGoals > 0:
                 if self.data.config.ovigoals_alt:
-                    self.matrix.draw_text( (90,15), f"({seasonGoals})", font=self.font.medium, fill=(0,233,233) )
-                    self.matrix.draw_text( (90,27), f"*{expectedGoals}", font=self.font.medium, fill=(0,233,233) )
+                    self.matrix.draw_text( (86,15), "pts:", font=self.font.medium, fill=(0,233,233) )
+                    self.matrix.draw_text( (86,27), f"{points}", font=self.font.medium, fill=(0,233,233) )
                     self.data.config.ovigoals_alt = False
                     debug.info(f"Setting data.config.ovigoals_alt: {self.data.config.ovigoals_alt}")
                 else:
-                    self.matrix.draw_text( (90,15), "pts:", font=self.font.medium, fill=(0,233,233) )
-                    self.matrix.draw_text( (90,27), f"{points}", font=self.font.medium, fill=(0,233,233) )
+                    self.matrix.draw_text( (86,15), f"{seasonGoals}/{oviGames}", font=self.font.medium, fill=(0,233,233) )
+                    self.matrix.draw_text( (86,27), f"*{expectedGoals}", font=self.font.medium, fill=(0,233,233) )
                     self.data.config.ovigoals_alt = True
                     debug.info(f"Setting data.config.ovigoals_alt: {self.data.config.ovigoals_alt}")
             else:
