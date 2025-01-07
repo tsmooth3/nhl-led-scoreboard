@@ -32,8 +32,8 @@ class OviGoals:
         tdata = requests.get(team_uri)
         oparsed = odata.json()
         tparsed = tdata.json()
-        seasongames = tparsed.get('games', [])
-        teamGamesLeft = sum(1 for game in seasongames if game['gameType'] == 2 and game['gameState'] != 'OFF')
+        teamSeasonGames = tparsed.get('games', [])
+        teamGamesLeft = sum(1 for game in teamSeasonGames if game['gameType'] == 2 and game['gameState'] != 'OFF')
         goalcount = oparsed['careerTotals']['regularSeason']['goals']
         points = oparsed['careerTotals']['regularSeason']['points']
         try:
@@ -53,9 +53,10 @@ class OviGoals:
         debug.info(f"Ovi Goals    : {goalcount}")
         debug.info(f"Ovi Points   : {points}")
         debug.info(f"season Goals : {seasonGoals}")
-        debug.info(f"season Games : {seasonGames}")
+        debug.info(f"Games Played : {seasonGames}")
+        debug.info(f"Games Left   : {teamGamesLeft}")
         debug.info(f"goalpct      : {goalpct}")
-        debug.info(f"expected Goals 82 Games : {expectedGoals}")
+        debug.info(f"expected Goals for Games Played + Games Left : {expectedGoals}")
 
         jagr = 767
         howe = 802
@@ -98,7 +99,7 @@ class OviGoals:
                     self.data.config.ovigoals_alt = False
                     debug.info(f"Setting data.config.ovigoals_alt: {self.data.config.ovigoals_alt}")
                 else:
-                    self.matrix.draw_text( (86,15), f"{seasonGoals}/{oviGames}", font=self.font.medium, fill=(0,233,233) )
+                    self.matrix.draw_text( (86,15), f"{seasonGoals}:{teamGamesLeft}", font=self.font.medium, fill=(0,233,233) )
                     self.matrix.draw_text( (86,27), f"*{expectedGoals}", font=self.font.medium, fill=(0,233,233) )
                     self.data.config.ovigoals_alt = True
                     debug.info(f"Setting data.config.ovigoals_alt: {self.data.config.ovigoals_alt}")
