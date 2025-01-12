@@ -79,13 +79,13 @@ class Scoreboard:
         # away = linescore.teams.away
         away_team = overview["awayTeam"]
         away_team_id = away_team["id"]
-        away_team_name = away_team["name"]["default"]
+        away_team_name = away_team["commonName"]["default"]
         away_abbrev = data.teams_info[away_team_id].details.abbrev
 
         # home = linescore.teams.home
         home_team = overview["homeTeam"]
         home_team_id = home_team["id"]
-        home_team_name = home_team["name"]["default"]
+        home_team_name = home_team["commonName"]["default"]
         home_abbrev = data.teams_info[home_team_id].details.abbrev
 
         away_goal_plays = []

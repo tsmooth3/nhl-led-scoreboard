@@ -36,7 +36,7 @@ class Easter:
 
         else:
             #today is not Easter
-            if self.days_to_easter < 100: 
+            if self.days_to_easter < 50: 
                 self.easter_countdown()
 
     def calc_easter(self, year):
